@@ -3,164 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Micaela - 1 Mes</title>
+    <title>Para mi nena hermosa - 1 Mes</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;600&display=swap');
 
         body {
-            background-color: #ffe4e1;
+            background-color: #fff0f5; /* LavenderBlush */
             font-family: 'Quicksand', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            padding: 0;
+            overflow-x: hidden;
+            color: #4a4a4a;
         }
 
-        /* Botón Inicial para activar música */
-        #start-btn {
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            background-color: #d81b60;
+        /* Corazones y Flores flotantes */
+        .decoracion {
+            position: fixed;
+            font-size: 2rem;
+            user-select: none;
+            z-index: -1;
+            animation: flotar 6s infinite ease-in-out;
+        }
+
+        @keyframes flotar {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 50px 5px 50px 5px;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.6);
+            border: 2px solid #ffb6c1;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            color: #d81b60;
+            font-size: 4rem;
+            margin: 0;
+        }
+
+        .fecha {
+            color: #ff69b4;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+        }
+
+        p {
+            line-height: 1.8;
+            font-size: 1.15rem;
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+
+        .resaltado {
+            color: #d81b60;
+            font-weight: 600;
+            border-bottom: 2px dashed #ffb6c1;
+        }
+
+        .firma {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: #d81b60;
+            margin-top: 40px;
+        }
+
+        /* Botón de Música */
+        #music-btn {
+            background: #d81b60;
             color: white;
             border: none;
-            border-radius: 50px;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(216, 27, 96, 0.4);
-            z-index: 100;
-            font-family: 'Dancing Script', cursive;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: 0.3s;
         }
 
-        .book-container {
-            display: none; /* Se oculta hasta que den click al botón */
-            perspective: 1500px;
-            width: 320px;
-            height: 450px;
-            position: relative;
-        }
+        #music-btn:hover { transform: scale(1.05); background: #ff1493; }
 
-        .book {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.5s;
-        }
-
-        .page {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform-origin: left;
-            transform-style: preserve-3d;
-            transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
-            background: white;
-            border-radius: 5px 15px 15px 5px;
-            box-shadow: inset 3px 0px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
-
-        .front, .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            padding: 30px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            border: 1px solid #ffc0cb;
-        }
-
-        .back { transform: rotateY(180deg); background: #fffafb; }
-
-        /* Colores de las páginas */
-        .p1 .front { background: #ffb6c1; color: white; } /* Portada */
-        .p1 .front h2 { font-family: 'Dancing Script', cursive; font-size: 2.5rem; }
-
-        .flipped { transform: rotateY(-180deg); }
-
-        p { font-size: 0.95rem; line-height: 1.6; color: #444; margin: 0; }
-        h3 { font-family: 'Dancing Script', cursive; color: #d81b60; font-size: 1.8rem; margin-bottom: 10px; }
-        .instruccion { position: absolute; bottom: 10px; font-size: 0.7rem; color: #d81b60; font-weight: bold; }
-
-        /* Estilo para que la música se oculte */
-        #player { display: none; }
+        iframe { border-radius: 15px; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
 
-    <button id="start-btn" onclick="startExperience()">Toca para empezar nuestra historia 🎵</button>
+    <div class="decoracion" style="top: 10%; left: 5%;">🌷</div>
+    <div class="decoracion" style="top: 15%; right: 8%; animation-delay: 1s;">🌸</div>
+    <div class="decoracion" style="bottom: 20%; left: 10%; animation-delay: 2s;">❤️</div>
+    <div class="decoracion" style="bottom: 15%; right: 5%; animation-delay: 3s;">🌷</div>
+    <div class="decoracion" style="top: 50%; left: 2%; animation-delay: 4s;">🌸</div>
 
-    <div class="book-container" id="container">
-        <div class="book">
-            
-            <div class="page p3" id="page3">
-                <div class="front">
-                    <h3>Para toda la vida</h3>
-                    <p>Quiero ser ese apoyo que nunca te falte, el que te cuide en tus días malos y el que celebre cada uno de tus logros como si fueran míos. Simplemente, tú eres mi razón para todo, mi felicidad y mi lugar seguro.</p>
-                    <p style="font-family: 'Dancing Script', cursive; font-size: 1.5rem; margin-top: 20px; color: #d81b60;">Te amo con todo lo que soy.</p>
-                </div>
-                <div class="back"></div>
-            </div>
-
-            <div class="page p2" id="page2" onclick="flipPage('page2')">
-                <div class="front">
-                    <h3>Mi lugar feliz</h3>
-                    <p>Sos la persona que le da sentido a mis días. Este primer mes ha sido el inicio de algo que quiero que sea eterno. No me canso de decirte lo perfecta que sos para mí, ni de agradecerte por elegirme.</p>
-                    <span class="instruccion">Toca para seguir leyendo →</span>
-                </div>
-                <div class="back"></div>
-            </div>
-
-            <div class="page p1" id="page1" onclick="flipPage('page1')">
-                <div class="front">
-                    <h2>Para: Micaela</h2>
-                    <p style="color: white;">Nuestro Primer Mes</p>
-                    <div style="font-size: 3rem; margin-top: 20px;">🌷🌸</div>
-                    <span class="instruccion" style="color: white;">Toca para abrir →</span>
-                </div>
-                <div class="back">
-                    <h3>Un mes juntos</h3>
-                    <p>Te amo, mi nena hermosa, sos tan especial para mí. Me pone feliz saber que eres mi novia. Gracias por aguantarme este mes en mis payasadas y momentos sentimentales.</p>
-                    <span class="instruccion">Toca para seguir leyendo →</span>
-                </div>
-            </div>
-
+    <div class="container">
+        <button id="music-btn" onclick="activarMusica()">🎵 Toca para escuchar nuestra canción 🎵</button>
+        
+        <div id="player-container">
+            <iframe id="musica" width="100%" height="80" src="https://www.youtube.com/embed/5aXW9-8W67c?enablejsapi=1" frameborder="0"></iframe>
         </div>
+
+        <h1>Micaela</h1>
+        <div class="fecha">21 DE MARZO • 1 MES</div>
+
+        <p>Te amo, mi nena hermosa, sos tan especial para mí, en serio, te amo con toda mi existencia. Me pone feliz saber que estás bien, saber que eres mi novia y poder amarte; es tan hermoso como tú lo eres.</p>
+
+        <p>Por fin hoy es el día en el que cumplimos <span class="resaltado">1 mes de estar juntos</span>, amándote y adorándote, un mes en el cual me aguantaste en todo, mis payasadas, mis momentos sentimentales, etc. Sinceramente, estoy feliz por tenerte en mi vida.</p>
+
+        <p>Sos la persona que le da sentido a mis días y la que logra que todo se sienta mejor con solo estar presente. Este primer mes ha sido el inicio de algo que quiero que sea eterno, porque cada minuto a tu lado me hace darme cuenta de que sos lo que siempre soñé. No me canso de decirte lo perfecta que sos para mí, ni de agradecerte por elegirme y por dejarme ser parte de tu mundo.</p>
+
+        <p>Espero que esto siga así por más días, meses, semanas, años. Quiero hacer todo lo posible para seguir a tu lado y, si es posible, para toda la vida, porque deseo y anhelo un futuro hermoso contigo. Un futuro en el que no existan despedidas, sino que al despertar, lo primero que vea sea tu hermosura, para amarte y abrazarte, besarte y acariciarte. </p>
+        
+        <p>Quiero ser ese apoyo que nunca te falte, el que te cuide en tus días malos y el que celebre cada uno de tus logros como si fueran míos. Simplemente, tú eres mi razón para todo, mi felicidad y mi lugar seguro.</p>
+
+        <p>Gracias por este mes tan increíble, por tu paciencia y por amarme de la forma en que lo hacés.</p>
+
+        <div class="firma">Te amo con todo lo que soy.</div>
     </div>
 
-    <div id="player-container"></div>
-
     <script>
-        function startExperience() {
-            document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('container').style.display = 'block';
-            
-            // Crear el iframe de música dinámicamente para forzar el play
-            const player = document.createElement('iframe');
-            player.setAttribute('src', 'https://www.youtube.com/embed/5aXW9-8W67c?autoplay=1');
-            player.setAttribute('id', 'player');
-            document.getElementById('player-container').appendChild(player);
-        }
-
-        function flipPage(id) {
-            const page = document.getElementById(id);
-            page.classList.toggle('flipped');
-            
-            // Si es la página 1, movemos el z-index para que no tape a la 2
-            if(id === 'page1') {
-                setTimeout(() => {
-                    page.style.zIndex = page.classList.contains('flipped') ? 1 : 3;
-                }, 500);
-            }
+        function activarMusica() {
+            var player = document.getElementById('musica');
+            player.style.display = 'block';
+            player.src += "&autoplay=1";
+            document.getElementById('music-btn').style.display = 'none';
         }
     </script>
 </body>
