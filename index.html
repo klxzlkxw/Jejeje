@@ -3,104 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡No me vais a ganar!</title>
+    <title>Para mi nena hermosa - 1 Mes</title>
     <style>
-        /* Estilos globales */
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;600&display=swap');
+
         body {
-            font-family: 'Courier New', Courier, monospace; /* Fuente estilo máquina de escribir, divertida */
-            background-color: #3e2723; /* Marrón oscuro de fondo */
-            color: #fff;
+            background-color: #ffe4e1; /* Rosa pastel suave */
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden; /* Para que las poops flotantes no creen barras de desplazamiento */
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Contenedor principal */
-        .contenedor {
-            text-align: center;
-            position: relative;
-            z-index: 10; /* Asegura que el texto esté sobre las poops flotantes */
-            background-color: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente para el texto */
+        .carta {
+            background-color: rgba(255, 255, 255, 0.95);
+            max-width: 600px;
             padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.5);
+            text-align: center;
+            border: 3px solid #ffb6c1;
+            position: relative;
         }
 
-        /* Título principal */
+        .flor { position: absolute; font-size: 2.5rem; opacity: 0.8; }
+        .f1 { top: 15px; left: 15px; } .f2 { top: 15px; right: 15px; }
+        .f3 { bottom: 15px; left: 15px; } .f4 { bottom: 15px; right: 15px; }
+
         h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            animation: temblor 0.5s infinite; /* Animación de temblor */
+            font-family: 'Dancing Script', cursive;
+            color: #d81b60;
+            font-size: 3.5rem;
+            margin: 10px 0;
         }
 
-        /* Animación de temblor para el título */
-        @keyframes temblor {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        .subtitulo {
+            color: #ff69b4;
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
-        /* Subtítulo */
         p {
-            font-size: 1.5rem;
-            margin-top: 0;
-            opacity: 0.8;
+            color: #4a4a4a;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: justify;
         }
 
-        /* Poops flotantes de fondo */
-        .poop-flotante {
-            position: absolute;
-            font-size: 2rem;
-            opacity: 0.2; /* Muy transparentes */
-            animation: flotar linear infinite;
+        .resaltado { color: #d81b60; font-weight: 600; }
+
+        .firma {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: #d81b60;
+            margin-top: 30px;
         }
 
-        /* Animación para que las poops floten hacia arriba */
-        @keyframes flotar {
-            0% { transform: translateY(100vh) rotate(0deg); }
-            100% { transform: translateY(-100vh) rotate(360deg); }
+        .musica-container {
+            margin-top: 30px;
+            padding: 15px;
+            background: #fff0f5;
+            border-radius: 15px;
+            border: 1px dashed #ffb6c1;
         }
-
-        /* Generar múltiples poops con diferentes retrasos y posiciones */
-        .poop-flotante:nth-child(1) { left: 10%; animation-duration: 15s; animation-delay: 0s; }
-        .poop-flotante:nth-child(2) { left: 20%; animation-duration: 18s; animation-delay: 2s; }
-        .poop-flotante:nth-child(3) { left: 30%; animation-duration: 12s; animation-delay: 4s; }
-        .poop-flotante:nth-child(4) { left: 40%; animation-duration: 20s; animation-delay: 1s; }
-        .poop-flotante:nth-child(5) { left: 50%; animation-duration: 16s; animation-delay: 3s; }
-        .poop-flotante:nth-child(6) { left: 60%; animation-duration: 14s; animation-delay: 5s; }
-        .poop-flotante:nth-child(7) { left: 70%; animation-duration: 19s; animation-delay: 0.5s; }
-        .poop-flotante:nth-child(8) { left: 80%; animation-duration: 17s; animation-delay: 2.5s; }
-        .poop-flotante:nth-child(9) { left: 90%; animation-duration: 13s; animation-delay: 4.5s; }
-
     </style>
 </head>
 <body>
 
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
-    <div class="poop-flotante">💩</div>
+    <div class="carta">
+        <div class="flor f1">🌷</div>
+        <div class="flor f2">🌸</div>
+        <div class="flor f3">🌸</div>
+        <div class="flor f4">🌷</div>
 
-    <div class="contenedor">
-        <h1>No me vais a ganar,</h1>
-        <p>pero tiamo</p>
+        <h1>Micaela</h1>
+        <div class="subtitulo">Nuestro Primer Mes</div>
+
+        <p>Te amo, mi nena hermosa, sos tan especial para mí, en serio, te amo con toda mi existencia. Me pone feliz saber que estás bien, saber que eres mi novia y poder amarte; es tan hermoso como tú lo eres. Por fin hoy es el día en el que cumplimos <span class="resaltado">1 mes de estar juntos</span>, amándote y adorándote, un mes en el cual me aguantaste en todo, mis payasadas, mis momentos sentimentales, etc. Sinceramente, estoy feliz por tenerte en mi vida.</p>
+
+        <p>Sos la persona que le da sentido a mis días y la que logra que todo se sienta mejor con solo estar presente. Este primer mes ha sido el inicio de algo que quiero que sea eterno, porque cada minuto a tu lado me hace darme cuenta de que sos lo que siempre soñé. No me canso de decirte lo perfecta que sos para mí, ni de agradecerte por elegirme y por dejarme ser parte de tu mundo.</p>
+
+        <p>Espero que esto siga así por más días, meses, semanas, años. Quiero hacer todo lo posible para seguir a tu lado y, si es posible, para toda la vida, porque deseo y anhelo un futuro hermoso contigo. Un futuro en el que no existan despedidas, sino que al despertar, lo primero que vea sea tu hermosura, para amarte y abrazarte, besarte y acariciarte. Quiero ser ese apoyo que nunca te falte, el que te cuide en tus días malos y el que celebre cada uno de tus logros como si fueran míos.</p>
+
+        <p>Simplemente, tú eres mi razón para todo, mi felicidad y mi lugar seguro. Gracias por este mes tan increíble, por tu paciencia y por amarme de la forma en que lo hacés.</p>
+
+        <div class="firma">Te amo con todo lo que soy.</div>
+
+        <div class="musica-container">
+            <small style="color: #888;">Dale Play para escuchar nuestra canción:</small><br>
+            <iframe width="100%" height="80" src="https://www.youtube.com/embed/5aXW9-8W67c" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p style="font-size: 0.8rem; text-align: center; margin-top: 5px;">🎵 My One and Only Love - Mon Laferte</p>
+        </div>
     </div>
 
 </body>
