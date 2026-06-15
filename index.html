@@ -1,52 +1,55 @@
 <!DOCTYPE html>
 <html>
-<head><style>body{margin:0; overflow:hidden; background:#87CEEB; font-family:sans-serif;}</style></head>
+<head>
+    <style>
+        body { margin: 0; background: #87CEEB; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { background: #87CEEB; border-bottom: 5px solid #2d5a27; }
+        #text { position: absolute; top: 10%; color: white; font-family: 'Arial', sans-serif; font-size: 24px; font-weight: bold; }
+    </style>
+</head>
 <body>
-<canvas id="c"></canvas>
-<script>
-const c = document.getElementById('c'), ctx = c.getContext('2d');
-c.width = window.innerWidth; c.height = window.innerHeight;
+    <div id="text">Aca estan tus manzanas bro</div>
+    <canvas id="game"></canvas>
 
-let apples = Array.from({length: 8}, () => ({x: 200+Math.random()*200, y: 150+Math.random()*150, split: false}));
-let cloudX = 0, guyX = 0;
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = 800; canvas.height = 500;
+
+// Configuración de elementos
+let apples = [{x: 350, y: 150, split: false}, {x: 450, y: 180, split: false}, {x: 400, y: 100, split: false}];
+let guyX = 400;
 
 function draw() {
-    ctx.clearRect(0,0,c.width, c.height);
-    // Nubes
-    ctx.fillStyle = "white";
-    cloudX = (cloudX + 0.5) % c.width;
-    ctx.beginPath(); ctx.arc(cloudX, 100, 50, 0, Math.PI*2); ctx.fill();
-    
-    // Texto
-    ctx.fillStyle = "white"; ctx.font = "24px sans-serif";
-    ctx.fillText("Aca estan tus manzanas bro", c.width/2 - 150, 50);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Árbol
-    ctx.fillStyle = "#8B4513"; ctx.fillRect(c.width/2 - 20, 300, 40, 200);
-    ctx.fillStyle = "#228B22"; ctx.beginPath(); ctx.arc(c.width/2, 300, 100, 0, Math.PI*2); ctx.fill();
+    // Árbol (Tronco y copa)
+    ctx.fillStyle = '#5d4037'; ctx.fillRect(380, 250, 40, 150);
+    ctx.fillStyle = '#388e3c'; ctx.beginPath(); ctx.arc(400, 200, 80, 0, Math.PI*2); ctx.fill();
 
     // Manzanas
     apples.forEach(a => {
-        ctx.fillStyle = a.split ? "#FF4500" : "red";
+        ctx.fillStyle = a.split ? '#d32f2f' : '#f44336';
         ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
         if(a.split) {
-            ctx.fillStyle = "white"; ctx.fillText("|", a.x-3, a.y+5);
+            ctx.fillStyle = "white";
+            ctx.fillRect(a.x - 2, a.y - 10, 4, 20); // Línea de partición
         }
     });
 
-    // Muñequito
-    guyX = (Math.sin(Date.now()/500) * 100) + c.width/2;
-    ctx.strokeStyle = "black"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(guyX, 550, 15, 0, Math.PI*2); ctx.stroke(); // Cabeza
-    ctx.moveTo(guyX, 565); ctx.lineTo(guyX, 600); ctx.stroke(); // Cuerpo
+    // Muñequito fluido
+    guyX = 400 + Math.sin(Date.now() / 300) * 50;
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(guyX, 420, 20, 0, Math.PI*2); ctx.fill(); // Cabeza
+    ctx.fillStyle = "black"; ctx.fillRect(guyX - 5, 440, 10, 40); // Cuerpo
 
     requestAnimationFrame(draw);
 }
 
-c.addEventListener('mousedown', (e) => {
-    apples.forEach(a => {
-        if(Math.hypot(e.clientX - a.x, e.clientY - a.y) < 30) a.split = true;
-    });
+canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    apples.forEach(a => { if(Math.hypot(x - a.x, y - a.y) < 30) a.split = true; });
 });
 
 draw();
