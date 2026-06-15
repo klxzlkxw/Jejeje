@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { background: #fff0f5; text-align: center; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        body { background: #fff0f5; text-align: center; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
         h1 { font-size: 3.5rem; color: #d63384; margin-bottom: 20px; }
         p { font-size: 1.3rem; color: #555; max-width: 600px; margin-bottom: 30px; }
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 20px; margin: 10px; }
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 20px; margin: 10px; transition: 0.3s; }
         #si { background: #ff4d6d; color: white; }
         #no { background: #adb5bd; color: white; }
-
-        /* Efecto de onda explosiva */
-        .explosion { position: relative; font-size: 5rem; animation: pulse 0.5s ease-out; }
-        @keyframes pulse {
+        
+        #confeti { position: absolute; font-size: 2rem; pointer-events: none; }
+        @keyframes explosion {
             0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(2); opacity: 0; }
+            100% { transform: scale(5); opacity: 0; }
         }
-        .shake { animation: shake 0.5s; font-size: 5rem; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+        .animar-si { animation: explosion 0.8s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -31,19 +28,25 @@
         <button id="no" onclick="roto()">No</button>
     </div>
 
-    <div id="visual"></div>
+    <div id="visual" style="font-size: 5rem;"></div>
 
     <script>
         function amor() {
             const visual = document.getElementById('visual');
             visual.innerHTML = "❤️";
-            visual.className = "explosion";
-            // Repetir el efecto para que parezca una onda constante
-            setTimeout(() => { visual.className = ""; }, 500);
+            visual.classList.add('animar-si');
+            // Crear efecto de confeti
+            for(let i=0; i<20; i++) {
+                let c = document.createElement('div');
+                c.innerHTML = "✨";
+                c.style.position = "absolute";
+                c.style.left = Math.random() * 100 + "vw";
+                c.style.top = Math.random() * 100 + "vh";
+                document.body.appendChild(c);
+            }
         }
         function roto() {
             document.getElementById('visual').innerHTML = "💔";
-            document.getElementById('visual').className = "shake";
         }
     </script>
 </body>
