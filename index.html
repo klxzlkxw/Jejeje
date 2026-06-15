@@ -1,28 +1,55 @@
-<canvas id="canvas"></canvas>
+<!DOCTYPE html>
+<html>
+<head><style>body{margin:0; overflow:hidden; background:#87CEEB; font-family:sans-serif;}</style></head>
+<body>
+<canvas id="c"></canvas>
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+c.width = window.innerWidth; c.height = window.innerHeight;
 
-let cloudX = 0;
-let guyX = 0;
+let apples = Array.from({length: 8}, () => ({x: 200+Math.random()*200, y: 150+Math.random()*150, split: false}));
+let cloudX = 0, guyX = 0;
 
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Nubes en movimiento
-    cloudX = (cloudX + 0.5) % canvas.width;
+function draw() {
+    ctx.clearRect(0,0,c.width, c.height);
+    // Nubes
     ctx.fillStyle = "white";
-    ctx.beginPath(); ctx.arc(cloudX, 100, 40, 0, Math.PI*2); ctx.fill();
+    cloudX = (cloudX + 0.5) % c.width;
+    ctx.beginPath(); ctx.arc(cloudX, 100, 50, 0, Math.PI*2); ctx.fill();
     
-    // Muñequito simple (caminando)
-    guyX = (guyX + 2) % canvas.width;
-    ctx.fillStyle = "black";
-    ctx.beginPath(); ctx.arc(guyX, 500, 15, 0, Math.PI*2); ctx.fill(); // Cabeza
-    ctx.fillRect(guyX-2, 515, 4, 40); // Cuerpo
+    // Texto
+    ctx.fillStyle = "white"; ctx.font = "24px sans-serif";
+    ctx.fillText("Aca estan tus manzanas bro", c.width/2 - 150, 50);
 
-    requestAnimationFrame(animate);
+    // Árbol
+    ctx.fillStyle = "#8B4513"; ctx.fillRect(c.width/2 - 20, 300, 40, 200);
+    ctx.fillStyle = "#228B22"; ctx.beginPath(); ctx.arc(c.width/2, 300, 100, 0, Math.PI*2); ctx.fill();
+
+    // Manzanas
+    apples.forEach(a => {
+        ctx.fillStyle = a.split ? "#FF4500" : "red";
+        ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
+        if(a.split) {
+            ctx.fillStyle = "white"; ctx.fillText("|", a.x-3, a.y+5);
+        }
+    });
+
+    // Muñequito
+    guyX = (Math.sin(Date.now()/500) * 100) + c.width/2;
+    ctx.strokeStyle = "black"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(guyX, 550, 15, 0, Math.PI*2); ctx.stroke(); // Cabeza
+    ctx.moveTo(guyX, 565); ctx.lineTo(guyX, 600); ctx.stroke(); // Cuerpo
+
+    requestAnimationFrame(draw);
 }
-animate();
+
+c.addEventListener('mousedown', (e) => {
+    apples.forEach(a => {
+        if(Math.hypot(e.clientX - a.x, e.clientY - a.y) < 30) a.split = true;
+    });
+});
+
+draw();
 </script>
+</body>
+</html>
