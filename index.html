@@ -1,90 +1,28 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body { margin: 0; background: #090A0F; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+<canvas id="canvas"></canvas>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-        /* Fondo espacial */
-        .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: moveStars linear infinite; }
-        .roca { position: absolute; font-size: 1.5rem; animation: moveStars linear infinite; opacity: 0.6; }
-        
-        @keyframes moveStars { from { transform: translateY(-5vh); } to { transform: translateY(105vh); } }
+let cloudX = 0;
+let guyX = 0;
 
-        h1 { font-size: 3rem; color: #ffb7c5; text-shadow: 0 0 15px #ff4d6d; text-align: center; }
-        p { font-size: 1.2rem; max-width: 600px; text-align: center; color: #e0e0e0; margin-bottom: 20px; }
-        
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 30px; margin: 10px; transition: 0.3s; }
-        #si { background: #ff4d6d; color: white; }
-        #no { background: #555; color: white; }
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Nubes en movimiento
+    cloudX = (cloudX + 0.5) % canvas.width;
+    ctx.fillStyle = "white";
+    ctx.beginPath(); ctx.arc(cloudX, 100, 40, 0, Math.PI*2); ctx.fill();
+    
+    // Muñequito simple (caminando)
+    guyX = (guyX + 2) % canvas.width;
+    ctx.fillStyle = "black";
+    ctx.beginPath(); ctx.arc(guyX, 500, 15, 0, Math.PI*2); ctx.fill(); // Cabeza
+    ctx.fillRect(guyX-2, 515, 4, 40); // Cuerpo
 
-        #visual { margin-top: 20px; font-size: 6rem; position: relative; display: flex; justify-content: center; align-items: center; }
-
-        /* Onda con forma de corazón */
-        .onda-corazon { 
-            position: absolute; border: 4px solid #ff4d6d; border-radius: 50%;
-            animation: expandirCorazon 2s ease-out forwards; pointer-events: none;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .onda-corazon::before { content: "💗"; font-size: 2rem; }
-
-        @keyframes expandirCorazon { 
-            0% { width: 50px; height: 50px; opacity: 1; border-radius: 50%; }
-            50% { border-radius: 40% 40% 10% 40%; }
-            100% { width: 400px; height: 400px; opacity: 0; border-radius: 50%; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="stars" id="space"></div>
-
-    <h1>¿Te quieres casar conmigo, mi bebecita hermosa?</h1>
-    <p>Me gustaría casarme con esta mujer tan hermosa y divina, porque es con vos que quiero pasar el resto de mi vida. Te amo demasiado y espero que este amor que nos tenemos dure toda la vida, mi niña hermosa y perfecta.</p>
-
-    <div>
-        <button id="si" onclick="amor()">Sí, acepto</button>
-        <button id="no" onclick="roto()">No</button>
-    </div>
-
-    <div id="visual"></div>
-
-    <script>
-        const space = document.getElementById('space');
-        
-        // Crear estrellas
-        for (let i = 0; i < 80; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            space.appendChild(s);
-        }
-
-        // Crear rocas corazón
-        for (let i = 0; i < 6; i++) {
-            const r = document.createElement('div');
-            r.className = 'roca';
-            r.innerHTML = "💗";
-            r.style.left = Math.random() * 100 + '%';
-            r.style.animationDuration = (Math.random() * 8 + 12) + 's';
-            r.style.animationDelay = (Math.random() * 5) + 's';
-            space.appendChild(r);
-        }
-
-        function amor() {
-            const v = document.getElementById('visual');
-            v.innerHTML = "💗";
-            for(let i=0; i<3; i++) {
-                const o = document.createElement('div');
-                o.className = 'onda-corazon';
-                o.style.animationDelay = (i * 0.5) + "s";
-                v.appendChild(o);
-            }
-        }
-        function roto() { document.getElementById('visual').innerHTML = "💔"; }
-    </script>
-</body>
-</html>
+    requestAnimationFrame(animate);
+}
+animate();
+</script>
