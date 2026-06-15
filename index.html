@@ -2,41 +2,43 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Propuesta Especial</title>
     <style>
-        /* Fondo espacial con estrellas en movimiento */
-        body {
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+        body { 
+            margin: 0; background: #090A0F; color: white; 
+            font-family: sans-serif; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; height: 100vh; overflow: hidden; 
         }
 
-        /* Generador de estrellas */
+        /* Estrellas en movimiento infinito */
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle var(--duration) infinite; }
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .star { 
+            position: absolute; background: white; border-radius: 50%; 
+            animation: moveStars linear infinite; 
+        }
+        @keyframes moveStars { 
+            from { transform: translateY(0); } 
+            to { transform: translateY(100vh); } 
+        }
 
-        h1 { font-size: 3rem; color: #ffb7c5; text-shadow: 0 0 10px #ff4d6d; animation: float 3s ease-in-out infinite; }
-        p { font-size: 1.2rem; max-width: 600px; line-height: 1.6; text-align: center; color: #e0e0e0; }
-
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 30px; transition: 0.4s; margin: 10px; }
-        #si { background: #ff4d6d; color: white; box-shadow: 0 0 15px #ff4d6d; }
+        h1 { font-size: 3rem; color: #ffb7c5; text-shadow: 0 0 20px #ff4d6d; }
+        p { font-size: 1.2rem; max-width: 600px; text-align: center; color: #e0e0e0; margin-bottom: 30px; }
+        
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 30px; margin: 10px; transition: 0.3s; }
+        #si { background: #ff4d6d; color: white; }
         #no { background: #555; color: white; }
 
         #visual { margin-top: 30px; font-size: 6rem; position: relative; }
         
-        .onda { position: absolute; border: 2px solid #ff4d6d; border-radius: 50%; animation: ripple 1.5s linear forwards; pointer-events: none; }
-        @keyframes ripple { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        /* Onda expansiva fluida */
+        .onda { 
+            position: absolute; border: 4px solid #ff4d6d; border-radius: 50%; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            animation: expandir 1.5s ease-out forwards; pointer-events: none;
+        }
+        @keyframes expandir { 
+            0% { width: 50px; height: 50px; opacity: 1; } 
+            100% { width: 300px; height: 300px; opacity: 0; } 
+        }
     </style>
 </head>
 <body>
@@ -54,15 +56,14 @@
     <div id="visual"></div>
 
     <script>
-        // Crear estrellas infinitas
         const field = document.getElementById('starfield');
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 150; i++) {
             const s = document.createElement('div');
             s.className = 'star';
-            s.style.width = s.style.height = Math.random() * 3 + 'px';
+            s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
             s.style.left = Math.random() * 100 + '%';
             s.style.top = Math.random() * 100 + '%';
-            s.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            s.style.animationDuration = (Math.random() * 10 + 5) + 's';
             field.appendChild(s);
         }
 
@@ -72,9 +73,7 @@
             for(let i=0; i<3; i++) {
                 const o = document.createElement('div');
                 o.className = 'onda';
-                o.style.width = o.style.height = "100px";
-                o.style.left = "-20px";
-                o.style.animationDelay = (i * 0.3) + "s";
+                o.style.animationDelay = (i * 0.2) + "s";
                 v.appendChild(o);
             }
         }
