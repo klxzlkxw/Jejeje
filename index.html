@@ -2,51 +2,261 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Te quieres casar conmigo?</title>
     <style>
-        body { background: #fff0f5; text-align: center; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        h1 { font-size: 3.5rem; color: #d63384; margin-bottom: 20px; }
-        p { font-size: 1.3rem; color: #555; max-width: 600px; margin-bottom: 30px; }
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 20px; margin: 10px; transition: 0.3s; }
-        #si { background: #ff4d6d; color: white; }
-        #no { background: #adb5bd; color: white; }
-        
-        #confeti { position: absolute; font-size: 2rem; pointer-events: none; }
-        @keyframes explosion {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(5); opacity: 0; }
+        /* --- ESTILOS GENERALES Y DISEÑO --- */
+        body {
+            background: linear-gradient(135deg, #fff0f5 0%, #ffdde1 100%);
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más moderna y fluida */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Evita que el confeti cree barras de desplazamiento */
+            color: #333;
         }
-        .animar-si { animation: explosion 0.8s ease-out forwards; }
+
+        /* --- TIPOGRAFÍA Y TEXTOS --- */
+        h1 {
+            font-size: 4rem; /* Súper grande */
+            color: #d63384;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1); /* Suave sombra */
+            animation: floatText 3s ease-in-out infinite; /* Flotado suave constante */
+        }
+
+        p {
+            font-size: 1.4rem;
+            max-width: 700px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            color: #555;
+            background: rgba(255, 255, 255, 0.5); /* Fondo suave para legibilidad */
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        /* --- BOTONES --- */
+        .botones {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px; /* Bordes muy redondeados */
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #si {
+            background-color: #ff4d6d;
+            color: white;
+        }
+
+        #si:hover {
+            transform: translateY(-5px) scale(1.05); /* Efecto float al hover */
+            box-shadow: 0 8px 15px rgba(255, 77, 109, 0.4);
+        }
+
+        #no {
+            background-color: #adb5bd;
+            color: white;
+        }
+
+        #no:hover {
+            background-color: #6c757d;
+        }
+
+        /* --- ÁREA VISUAL (CORAZÓN Y EFECTOS) --- */
+        #visual-container {
+            position: relative; /* Necesario para los anillos */
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px; /* Espacio para la animación */
+        }
+
+        #corazon-principal {
+            font-size: 8rem;
+            transition: transform 0.3s ease;
+        }
+
+        /* --- ANIMACIONES DE EXPLOSIÓN DE ONDAS (CSS) --- */
+        .anillo-onda {
+            position: absolute;
+            border: 4px solid rgba(255, 77, 109, 0.7);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none; /* No interfiere con clics */
+        }
+
+        /* Esta clase activa la animación fluida */
+        .explotar-ondas .anillo-onda {
+            animation: ringExplosion 1.2s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+
+        @keyframes ringExplosion {
+            0% {
+                width: 0px;
+                height: 0px;
+                opacity: 1;
+                border-width: 8px;
+            }
+            100% {
+                width: 300px; /* Tamaño máximo de la onda */
+                height: 300px;
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+
+        /* --- ANIMACIÓN DE CONFETI FLUIDO (JS-GENERADO) --- */
+        .confeti {
+            position: absolute;
+            font-size: 1.5rem;
+            pointer-events: none;
+            opacity: 0;
+            animation: fallingConfetti 3s ease-out forwards;
+        }
+
+        @keyframes fallingConfetti {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg); /* Caen y giran mucho */
+                opacity: 0;
+            }
+        }
+
+        /* --- ANIMACIÓN DE TEXTO FLOTANTE --- */
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Estilo para el corazón roto con temblor */
+        .broken-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>¿Te quieres casar conmigo, mi bebecita hermosa?</h1>
+    <h1>¿Te quieres casar conmigo,<br>mi bebecita hermosa?</h1>
+    
     <p>Me gustaría casarme con esta mujer tan hermosa y divina, porque es con vos que quiero pasar el resto de mi vida. Te amo demasiado y espero que este amor que nos tenemos dure toda la vida, mi niña hermosa y perfecta.</p>
 
-    <div>
-        <button id="si" onclick="amor()">Sí, acepto</button>
-        <button id="no" onclick="roto()">No</button>
+    <div class="botones">
+        <button id="si" onclick="aceptarPropuesta()">Sí, acepto</button>
+        <button id="no" onclick="rechazarPropuesta()">No</button>
     </div>
 
-    <div id="visual" style="font-size: 5rem;"></div>
+    <div id="visual-container">
+        <div id="ondas-wrapper">
+            </div>
+        <div id="corazon-principal"></div>
+    </div>
 
     <script>
-        function amor() {
-            const visual = document.getElementById('visual');
-            visual.innerHTML = "❤️";
-            visual.classList.add('animar-si');
-            // Crear efecto de confeti
-            for(let i=0; i<20; i++) {
-                let c = document.createElement('div');
-                c.innerHTML = "✨";
-                c.style.position = "absolute";
-                c.style.left = Math.random() * 100 + "vw";
-                c.style.top = Math.random() * 100 + "vh";
-                document.body.appendChild(c);
+        const container = document.getElementById('visual-container');
+        const ondasWrapper = document.getElementById('ondas-wrapper');
+        const corazon = document.getElementById('corazon-principal');
+        const body = document.body;
+
+        let aceptado = false; // Bandera para controlar el estado
+
+        function aceptarPropuesta() {
+            if (aceptado) return; // Evita clics repetidos
+            aceptado = true;
+
+            // 1. Mostrar el corazón específico 💗
+            corazon.innerHTML = "💗";
+            corazon.classList.remove('broken-shake'); // Limpia si hubo un 'No' previo
+            
+            // 2. Crear y activar la explosión de ondas fluidas
+            ondasWrapper.innerHTML = ''; // Limpia ondas previas
+            const numAnillos = 4; // Cuántos anillos de onda queremos
+
+            for (let i = 0; i < numAnillos; i++) {
+                const anillo = document.createElement('div');
+                anillo.className = 'anillo-onda';
+                // Retraso ligero para cada anillo para el efecto "onda"
+                anillo.style.animationDelay = `${i * 0.15}s`;
+                ondasWrapper.appendChild(anillo);
             }
+
+            // Activa la animación CSS
+            container.classList.add('explotar-ondas');
+
+            // 3. Crear confeti fluido (estrellas y corazones)
+            crearConfeti();
+
+            // Desactivar botones
+            document.getElementById('si').disabled = true;
+            document.getElementById('no').disabled = true;
         }
-        function roto() {
-            document.getElementById('visual').innerHTML = "💔";
+
+        function rechazarPropuesta() {
+            aceptado = false; // Reset estado
+            corazon.innerHTML = "💔";
+            corazon.classList.remove('explotar-ondas'); // Limpia efecto 'Si'
+            ondasWrapper.innerHTML = ''; // Quita ondas
+            
+            // Efecto de temblor
+            corazon.classList.add('broken-shake');
+            
+            // Quita la clase de temblor después de la animación
+            setTimeout(() => {
+                corazon.classList.remove('broken-shake');
+            }, 500);
+        }
+
+        function crearConfeti() {
+            // Arreglo de emojis para el confeti
+            const emojis = ["✨", "💗", "💖", "💫"];
+            const numConfeti = 40; // Cuántas partículas
+
+            for (let i = 0; i < numConfeti; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confeti';
+                
+                // Emoji aleatorio
+                particle.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Posición horizontal aleatoria
+                particle.style.left = Math.random() * 100 + "vw";
+                // Posición vertical aleatoria inicial (arriba de la pantalla)
+                particle.style.top = -10 - (Math.random() * 20) + "vh";
+                
+                // Retraso de animación aleatorio para fluidez
+                particle.style.animationDelay = Math.random() * 1 + "s";
+                
+                body.appendChild(particle);
+
+                // Limpieza: elimina el elemento después de que la animación termine
+                setTimeout(() => {
+                    particle.remove();
+                }, 4000); // Duración de la animación + buffer
+            }
         }
     </script>
 </body>
