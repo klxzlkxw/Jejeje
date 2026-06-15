@@ -1,58 +1,471 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <style>
-        body { margin: 0; background: #87CEEB; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        canvas { background: #87CEEB; border-bottom: 5px solid #2d5a27; }
-        #text { position: absolute; top: 10%; color: white; font-family: 'Arial', sans-serif; font-size: 24px; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acá están tus manzanas bro 🍎</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    #scene {
+      position: relative;
+      width: 100%;
+      max-width: 860px;
+      height: 480px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #4FC3F7 0%, #81D4FA 55%, #B3E5FC 84%, #C8E6C9 84%, #81C784 100%);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      cursor: default;
+    }
+
+    #title-text {
+      position: absolute;
+      top: 14px; left: 16px;
+      font-size: 13px;
+      color: #1a3a5c;
+      letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.55);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-style: italic;
+      pointer-events: none;
+      z-index: 10;
+      backdrop-filter: blur(3px);
+    }
+
+    #apple-count {
+      position: absolute;
+      top: 14px; right: 16px;
+      font-size: 12px;
+      color: #b71c1c;
+      background: rgba(255,255,255,0.6);
+      padding: 4px 12px;
+      border-radius: 16px;
+      pointer-events: none;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    #sun-svg {
+      position: absolute;
+      top: 18px; right: 90px;
+      width: 70px; height: 70px;
+      animation: sunPulse 3s ease-in-out infinite;
+    }
+
+    .bird { position: absolute; }
+    #bird1 { top: 60px; right: 180px; width: 40px; height: 20px; animation: birdFly 4s ease-in-out infinite; }
+    #bird2 { top: 45px; right: 220px; width: 28px; height: 14px; animation: birdFly 5s ease-in-out infinite 1.5s; }
+
+    .cloud { position: absolute; opacity: 0.92; }
+    .cloud1 { top: 40px; width: 170px; height: 70px; animation: cloudMove 22s linear infinite; }
+    .cloud2 { top: 80px; width: 130px; height: 55px; animation: cloudMove 30s linear infinite 8s; }
+    .cloud3 { top: 20px; width: 100px; height: 45px; animation: cloudMove 26s linear infinite 14s; }
+
+    #tree-svg {
+      position: absolute;
+      left: 50%; bottom: 54px;
+      transform: translateX(-50%);
+      width: 320px; height: 340px;
+      overflow: visible;
+    }
+
+    .leaf { animation: leafSway 2.5s ease-in-out infinite; transform-origin: center bottom; }
+    .leaf-delay1 { animation-delay: 0.8s; }
+    .leaf-delay2 { animation-delay: 1.5s; }
+
+    .apple-group { cursor: pointer; }
+    .apple-group:hover .apple-body { filter: brightness(1.18); }
+    .apple-wobble {
+      animation: appleWiggle 3s ease-in-out infinite;
+      transform-origin: center top;
+    }
+
+    #ground-svg {
+      position: absolute;
+      bottom: 52px; left: 0;
+      width: 100%; height: 30px;
+      pointer-events: none;
+    }
+    #ground-fill {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 55px;
+      background: linear-gradient(180deg, #81C784 0%, #4CAF50 100%);
+      border-radius: 0 0 20px 20px;
+    }
+
+    .flower { position: absolute; bottom: 55px; pointer-events: none; }
+    #flower1 { left: 15%; width: 20px; height: 22px; }
+    #flower2 { left: 72%; width: 16px; height: 18px; }
+    #flower3 { left: 30%; width: 14px; height: 16px; }
+
+    #stickman {
+      position: absolute;
+      bottom: 60px; left: -70px;
+      width: 60px; height: 80px;
+      animation: walkAcross 9s linear infinite;
+    }
+    #stickman-svg { animation: bobHead 0.5s ease-in-out infinite; }
+    .left-arm  { transform-origin: 22px 30px; animation: swingLeftArm  0.5s ease-in-out infinite; }
+    .right-arm { transform-origin: 38px 30px; animation: swingRightArm 0.5s ease-in-out infinite; }
+    .left-leg  { transform-origin: 26px 61px; animation: swingLeftLeg  0.5s ease-in-out infinite; }
+    .right-leg { transform-origin: 34px 61px; animation: swingRightLeg 0.5s ease-in-out infinite; }
+
+    #splits-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .split-left  { animation: splitLeft  0.6s ease-out forwards; }
+    .split-right { animation: splitRight 0.6s ease-out forwards; }
+    .seed        { animation: seedPop    0.6s ease-out forwards 0.1s; }
+    .crunch-text {
+      position: absolute;
+      font-size: 18px; font-weight: 700;
+      color: #FF5722;
+      font-family: Georgia, serif;
+      white-space: nowrap;
+      animation: crunchText 0.8s ease-out forwards;
+      pointer-events: none;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    @keyframes cloudMove {
+      from { transform: translateX(-250px); }
+      to   { transform: translateX(920px);  }
+    }
+    @keyframes sunPulse {
+      0%, 100% { opacity: 0.85; }
+      50%      { opacity: 1;    }
+    }
+    @keyframes birdFly {
+      0%   { transform: translateX(-60px) translateY(0);   }
+      50%  { transform: translateX(0px)   translateY(-8px); }
+      100% { transform: translateX(60px)  translateY(0);   }
+    }
+    @keyframes leafSway {
+      0%, 100% { transform: rotate(-3deg); }
+      50%      { transform: rotate( 3deg); }
+    }
+    @keyframes walkAcross {
+      from { transform: translateX(0);     }
+      to   { transform: translateX(940px); }
+    }
+    @keyframes bobHead {
+      0%, 100% { transform: translateY(0px);  }
+      50%      { transform: translateY(-2px); }
+    }
+    @keyframes swingLeftArm {
+      0%, 100% { transform: rotate(-30deg); }
+      50%      { transform: rotate( 30deg); }
+    }
+    @keyframes swingRightArm {
+      0%, 100% { transform: rotate( 30deg); }
+      50%      { transform: rotate(-30deg); }
+    }
+    @keyframes swingLeftLeg {
+      0%, 100% { transform: rotate(-25deg); }
+      50%      { transform: rotate( 25deg); }
+    }
+    @keyframes swingRightLeg {
+      0%, 100% { transform: rotate( 25deg); }
+      50%      { transform: rotate(-25deg); }
+    }
+    @keyframes appleWiggle {
+      0%, 100% { transform: rotate(  0deg); }
+      25%      { transform: rotate( -5deg); }
+      75%      { transform: rotate(  5deg); }
+    }
+    @keyframes splitLeft {
+      0%   { transform: translateX(0)     rotate(  0deg); opacity: 1; }
+      100% { transform: translateX(-30px) rotate(-40deg); opacity: 0; }
+    }
+    @keyframes splitRight {
+      0%   { transform: translateX(0)    rotate( 0deg); opacity: 1; }
+      100% { transform: translateX(30px) rotate(40deg); opacity: 0; }
+    }
+    @keyframes seedPop {
+      0%   { transform: scale(0) translateY(0);     opacity: 1; }
+      100% { transform: scale(1) translateY(-22px); opacity: 0; }
+    }
+    @keyframes crunchText {
+      0%   { transform: scale(0)   translateY(0);     opacity: 1; }
+      60%  { transform: scale(1.3) translateY(-15px); opacity: 1; }
+      100% { transform: scale(1)   translateY(-32px); opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+    @media (max-width: 600px) {
+      #scene    { height: 320px; border-radius: 12px; }
+      #tree-svg { width: 210px; height: 220px; }
+      #stickman { width: 40px; height: 55px; }
+      #title-text { font-size: 11px; padding: 4px 10px; }
+    }
+  </style>
 </head>
 <body>
-    <div id="text">Aca estan tus manzanas bro</div>
-    <canvas id="game"></canvas>
+
+<div id="scene">
+
+  <div id="title-text">Acá están tus manzanas bro</div>
+  <div id="apple-count">🍎 6 manzanas</div>
+
+  <svg id="sun-svg" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="35" cy="35" r="18" fill="#FDD835" opacity="0.95"/>
+    <g stroke="#FDD835" stroke-width="2.5" stroke-linecap="round" opacity="0.7">
+      <line x1="35" y1="4"  x2="35" y2="13"/>
+      <line x1="35" y1="57" x2="35" y2="66"/>
+      <line x1="4"  y1="35" x2="13" y2="35"/>
+      <line x1="57" y1="35" x2="66" y2="35"/>
+      <line x1="14" y1="14" x2="20" y2="20"/>
+      <line x1="50" y1="50" x2="56" y2="56"/>
+      <line x1="56" y1="14" x2="50" y2="20"/>
+      <line x1="20" y1="50" x2="14" y2="56"/>
+    </g>
+  </svg>
+
+  <svg class="bird" id="bird1" viewBox="0 0 40 20" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 10 Q10 2 20 10 Q30 2 38 10" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <svg class="bird" id="bird2" viewBox="0 0 40 20" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 10 Q10 2 20 10 Q30 2 38 10" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+
+  <svg class="cloud cloud1" viewBox="0 0 170 70" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="85" cy="50" rx="70" ry="22" fill="white"/>
+    <ellipse cx="60" cy="42" rx="35" ry="26" fill="white"/>
+    <ellipse cx="110" cy="40" rx="30" ry="24" fill="white"/>
+    <ellipse cx="85" cy="36" rx="28" ry="20" fill="white"/>
+  </svg>
+  <svg class="cloud cloud2" viewBox="0 0 130 55" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="65" cy="38" rx="55" ry="18" fill="white" opacity="0.9"/>
+    <ellipse cx="45" cy="30" rx="28" ry="22" fill="white" opacity="0.9"/>
+    <ellipse cx="88" cy="28" rx="25" ry="20" fill="white" opacity="0.9"/>
+  </svg>
+  <svg class="cloud cloud3" viewBox="0 0 100 45" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="32" rx="42" ry="14" fill="white" opacity="0.85"/>
+    <ellipse cx="35" cy="24" rx="22" ry="18" fill="white" opacity="0.85"/>
+    <ellipse cx="65" cy="22" rx="20" ry="16" fill="white" opacity="0.85"/>
+  </svg>
+
+  <svg id="tree-svg" viewBox="0 0 320 340" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+    <path d="M148 340 Q152 280 150 240 Q148 200 155 180" stroke="#5D4037" stroke-width="22" fill="none" stroke-linecap="round"/>
+    <path d="M172 340 Q168 280 170 240 Q172 200 165 180" stroke="#4E342E" stroke-width="8"  fill="none" stroke-linecap="round" opacity="0.3"/>
+    <path d="M155 300 Q158 290 154 280" stroke="#4E342E" stroke-width="2" fill="none" opacity="0.4"/>
+    <path d="M165 310 Q162 295 166 285" stroke="#4E342E" stroke-width="2" fill="none" opacity="0.3"/>
+    <path d="M160 200 Q130 175 100 140" stroke="#6D4C41" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <path d="M160 200 Q190 165 220 130" stroke="#6D4C41" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <path d="M160 210 Q155 170 158 140" stroke="#6D4C41" stroke-width="11" fill="none" stroke-linecap="round"/>
+    <path d="M100 140 Q80 110 70 80"    stroke="#795548" stroke-width="8"  fill="none" stroke-linecap="round"/>
+    <path d="M100 140 Q115 105 110 75"  stroke="#795548" stroke-width="7"  fill="none" stroke-linecap="round"/>
+    <path d="M220 130 Q240 100 248 70"  stroke="#795548" stroke-width="8"  fill="none" stroke-linecap="round"/>
+    <path d="M220 130 Q205 100 210 68"  stroke="#795548" stroke-width="7"  fill="none" stroke-linecap="round"/>
+    <path d="M158 140 Q145 110 148 78"  stroke="#795548" stroke-width="7"  fill="none" stroke-linecap="round"/>
+    <ellipse cx="160" cy="55" rx="65" ry="50" fill="#2E7D32" opacity="0.7"/>
+    <ellipse cx="85"  cy="72" rx="52" ry="42" fill="#2E7D32" opacity="0.7"/>
+    <ellipse cx="235" cy="65" rx="50" ry="42" fill="#2E7D32" opacity="0.7"/>
+    <ellipse cx="160" cy="48" rx="68" ry="52" fill="#388E3C"/>
+    <ellipse cx="88"  cy="65" rx="58" ry="46" fill="#43A047"/>
+    <ellipse cx="232" cy="60" rx="56" ry="46" fill="#388E3C"/>
+    <ellipse cx="160" cy="42" rx="55" ry="42" fill="#4CAF50"/>
+    <ellipse cx="95"  cy="58" rx="44" ry="36" fill="#4CAF50"/>
+    <ellipse cx="225" cy="54" rx="44" ry="36" fill="#43A047"/>
+    <ellipse cx="140" cy="35" rx="22" ry="16" fill="#66BB6A" opacity="0.6"/>
+    <ellipse cx="195" cy="38" rx="18" ry="14" fill="#66BB6A" opacity="0.5"/>
+    <ellipse cx="82"  cy="50" rx="16" ry="12" fill="#66BB6A" opacity="0.5"/>
+    <ellipse class="leaf"          cx="120" cy="30" rx="10" ry="6" fill="#81C784" transform="rotate(-20,120,30)" opacity="0.7"/>
+    <ellipse class="leaf leaf-delay1" cx="200" cy="28" rx="9"  ry="5" fill="#81C784" transform="rotate(15,200,28)"  opacity="0.7"/>
+    <ellipse class="leaf leaf-delay2" cx="55"  cy="55" rx="8"  ry="5" fill="#81C784" transform="rotate(-10,55,55)"  opacity="0.6"/>
+    <g id="apples-container"></g>
+  </svg>
+
+  <svg id="ground-svg" viewBox="0 0 800 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="10" width="800" height="20" fill="#66BB6A"/>
+    <path d="M0 10 Q20 2 40 10 Q60 2 80 10 Q100 2 120 10 Q140 2 160 10 Q180 2 200 10 Q220 2 240 10
+             Q260 2 280 10 Q300 2 320 10 Q340 2 360 10 Q380 2 400 10 Q420 2 440 10 Q460 2 480 10
+             Q500 2 520 10 Q540 2 560 10 Q580 2 600 10 Q620 2 640 10 Q660 2 680 10 Q700 2 720 10
+             Q740 2 760 10 Q780 2 800 10" fill="#81C784"/>
+  </svg>
+  <div id="ground-fill"></div>
+
+  <svg class="flower" id="flower1" viewBox="0 0 20 22" xmlns="http://www.w3.org/2000/svg">
+    <line x1="10" y1="22" x2="10" y2="10" stroke="#388E3C" stroke-width="1.5"/>
+    <circle cx="10" cy="8" r="5" fill="#FFD54F"/>
+    <circle cx="10" cy="4" r="3" fill="#FFF176"/>
+  </svg>
+  <svg class="flower" id="flower2" viewBox="0 0 16 18" xmlns="http://www.w3.org/2000/svg">
+    <line x1="8" y1="18" x2="8" y2="8" stroke="#388E3C" stroke-width="1.5"/>
+    <circle cx="8" cy="6" r="4" fill="#F48FB1"/>
+    <circle cx="8" cy="3" r="2.5" fill="#FFCDD2"/>
+  </svg>
+  <svg class="flower" id="flower3" viewBox="0 0 14 16" xmlns="http://www.w3.org/2000/svg">
+    <line x1="7" y1="16" x2="7" y2="7" stroke="#388E3C" stroke-width="1.5"/>
+    <circle cx="7" cy="5" r="3.5" fill="#CE93D8"/>
+    <circle cx="7" cy="2.5" r="2" fill="#E1BEE7"/>
+  </svg>
+
+  <div id="stickman">
+    <svg id="stickman-svg" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="18" y="4"  width="24" height="4" rx="2" fill="#4E342E"/>
+      <rect x="21" y="0"  width="18" height="7" rx="2" fill="#6D4C41"/>
+      <circle cx="30" cy="16" r="10" fill="#FFCC80" stroke="#E65100" stroke-width="1.5"/>
+      <circle cx="26.5" cy="14"   r="1.8" fill="#fff"/>
+      <circle cx="33.5" cy="14"   r="1.8" fill="#fff"/>
+      <circle cx="27"   cy="14.5" r="0.9" fill="#333"/>
+      <circle cx="34"   cy="14.5" r="0.9" fill="#333"/>
+      <path d="M26 19 Q30 22.5 34 19" fill="none" stroke="#E65100" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="22" y="27" width="16" height="20" rx="3" fill="#1565C0"/>
+      <line x1="30" y1="26" x2="30" y2="28" stroke="#FFCC80" stroke-width="3"/>
+      <rect x="22" y="44" width="16" height="3"  rx="1.5" fill="#37474F"/>
+      <rect x="22" y="47" width="16" height="14" rx="2"   fill="#37474F"/>
+      <g class="left-arm">
+        <line x1="22" y1="30" x2="10" y2="46" stroke="#1565C0" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="10" cy="46" r="3" fill="#FFCC80"/>
+      </g>
+      <g class="right-arm">
+        <line x1="38" y1="30" x2="50" y2="46" stroke="#1565C0" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="50" cy="46" r="3" fill="#FFCC80"/>
+      </g>
+      <g class="left-leg">
+        <line x1="26" y1="61" x2="20" y2="78" stroke="#37474F" stroke-width="4" stroke-linecap="round"/>
+        <rect x="15" y="74" width="11" height="5" rx="2.5" fill="#4E342E"/>
+      </g>
+      <g class="right-leg">
+        <line x1="34" y1="61" x2="40" y2="78" stroke="#37474F" stroke-width="4" stroke-linecap="round"/>
+        <rect x="34" y="74" width="11" height="5" rx="2.5" fill="#4E342E"/>
+      </g>
+    </svg>
+  </div>
+
+  <div id="splits-container"></div>
+
+</div>
 
 <script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-canvas.width = 800; canvas.height = 500;
+  const NS = 'http://www.w3.org/2000/svg';
 
-// Configuración de elementos
-let apples = [{x: 350, y: 150, split: false}, {x: 450, y: 180, split: false}, {x: 400, y: 100, split: false}];
-let guyX = 400;
+  const APPLE_DATA = [
+    { cx: 108, cy:  95, stemLen: 16, delay: '0s'   },
+    { cx: 148, cy:  62, stemLen: 14, delay: '0.5s' },
+    { cx: 192, cy:  58, stemLen: 12, delay: '1s'   },
+    { cx: 232, cy:  76, stemLen: 16, delay: '1.5s' },
+    { cx:  82, cy: 118, stemLen: 18, delay: '0.8s' },
+    { cx: 258, cy: 108, stemLen: 16, delay: '1.3s' },
+  ];
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const CRUNCH_WORDS = ['¡CRACK!', '¡SNAP!', '¡CRUNCH!', '¡SPLIT!', '¡POP!', '¡ZAS!'];
 
-    // Árbol (Tronco y copa)
-    ctx.fillStyle = '#5d4037'; ctx.fillRect(380, 250, 40, 150);
-    ctx.fillStyle = '#388e3c'; ctx.beginPath(); ctx.arc(400, 200, 80, 0, Math.PI*2); ctx.fill();
+  let remaining    = APPLE_DATA.length;
+  const countEl    = document.getElementById('apple-count');
+  const applesG    = document.getElementById('apples-container');
+  const splitsCont = document.getElementById('splits-container');
 
-    // Manzanas
-    apples.forEach(a => {
-        ctx.fillStyle = a.split ? '#d32f2f' : '#f44336';
-        ctx.beginPath(); ctx.arc(a.x, a.y, 15, 0, Math.PI*2); ctx.fill();
-        if(a.split) {
-            ctx.fillStyle = "white";
-            ctx.fillRect(a.x - 2, a.y - 10, 4, 20); // Línea de partición
-        }
+  function el(tag, attrs = {}) {
+    const node = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    return node;
+  }
+
+  function drawApples() {
+    while (applesG.firstChild) applesG.removeChild(applesG.firstChild);
+    APPLE_DATA.forEach((a, i) => {
+      applesG.appendChild(el('line', {
+        x1: a.cx, y1: a.cy - 14, x2: a.cx, y2: a.cy - 14 - a.stemLen,
+        stroke: '#5D4037', 'stroke-width': '2.5', 'stroke-linecap': 'round'
+      }));
+      applesG.appendChild(el('ellipse', {
+        cx: a.cx + 7, cy: a.cy - 14 - a.stemLen + 2, rx: '7', ry: '4.5', fill: '#66BB6A',
+        transform: `rotate(-30,${a.cx + 7},${a.cy - 14 - a.stemLen + 2})`
+      }));
+      const wobble = el('g', { class: 'apple-wobble' });
+      wobble.style.animationDelay  = a.delay;
+      wobble.style.transformOrigin = `${a.cx}px ${a.cy - 14}px`;
+      wobble.appendChild(el('ellipse', { cx: a.cx, cy: a.cy, rx: '14', ry: '16', fill: '#E53935', class: 'apple-body' }));
+      wobble.appendChild(el('ellipse', { cx: a.cx - 4, cy: a.cy - 5, rx: '5', ry: '4', fill: 'white', opacity: '0.35', transform: `rotate(-20,${a.cx - 4},${a.cy - 5})` }));
+      wobble.appendChild(el('ellipse', { cx: a.cx, cy: a.cy - 14, rx: '3', ry: '2', fill: '#B71C1C', opacity: '0.5' }));
+      const appleG = el('g', { class: 'apple-group', role: 'button', tabindex: '0', 'aria-label': `Manzana ${i + 1}` });
+      appleG.appendChild(wobble);
+      appleG.addEventListener('click', () => splitApple(appleG, a, i));
+      appleG.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') splitApple(appleG, a, i); });
+      applesG.appendChild(appleG);
     });
+  }
 
-    // Muñequito fluido
-    guyX = 400 + Math.sin(Date.now() / 300) * 50;
-    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(guyX, 420, 20, 0, Math.PI*2); ctx.fill(); // Cabeza
-    ctx.fillStyle = "black"; ctx.fillRect(guyX - 5, 440, 10, 40); // Cuerpo
+  function splitApple(appleG, a, i) {
+    if (!appleG.parentNode) return;
+    const prev = appleG.previousSibling;
+    const prev2 = prev && prev.previousSibling;
+    appleG.style.display = 'none';
+    if (prev)  prev.style.display  = 'none';
+    if (prev2) prev2.style.display = 'none';
 
-    requestAnimationFrame(draw);
-}
+    const treeSvg  = document.getElementById('tree-svg');
+    const treeRect  = treeSvg.getBoundingClientRect();
+    const sceneRect = document.getElementById('scene').getBoundingClientRect();
+    const sx = (treeRect.left - sceneRect.left) + a.cx * (treeRect.width  / 320);
+    const sy = (treeRect.top  - sceneRect.top)  + a.cy * (treeRect.height / 340);
 
-canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    apples.forEach(a => { if(Math.hypot(x - a.x, y - a.y) < 30) a.split = true; });
-});
+    const anim = document.createElementNS(NS, 'svg');
+    anim.setAttribute('style', `position:absolute;left:${sx-40}px;top:${sy-25}px;width:90px;height:70px;overflow:visible;pointer-events:none`);
+    anim.setAttribute('viewBox', '0 0 90 70');
 
-draw();
+    const lG = el('g', { class: 'split-left' });
+    lG.appendChild(el('path', { d: 'M45 7 Q27 7 25 26 Q23 46 45 52 Z', fill: '#E53935' }));
+    lG.appendChild(el('path', { d: 'M45 10 Q37 19 37 30 Q37 42 45 50 Z', fill: '#FFECB3' }));
+    lG.appendChild(el('ellipse', { cx:'39', cy:'28', rx:'2.5', ry:'4', fill:'#5D4037', transform:'rotate(-15,39,28)' }));
+
+    const rG = el('g', { class: 'split-right' });
+    rG.appendChild(el('path', { d: 'M45 7 Q63 7 65 26 Q67 46 45 52 Z', fill: '#C62828' }));
+    rG.appendChild(el('path', { d: 'M45 10 Q53 19 53 30 Q53 42 45 50 Z', fill: '#FFF8E1' }));
+    rG.appendChild(el('ellipse', { cx:'51', cy:'28', rx:'2.5', ry:'4', fill:'#4E342E', transform:'rotate(15,51,28)' }));
+
+    const seed = el('ellipse', { cx:'45', cy:'36', rx:'2', ry:'3.5', fill:'#4E342E', class:'seed' });
+
+    anim.appendChild(lG); anim.appendChild(rG); anim.appendChild(seed);
+    splitsCont.appendChild(anim);
+
+    const txt = document.createElement('div');
+    txt.className   = 'crunch-text';
+    txt.textContent = CRUNCH_WORDS[i % CRUNCH_WORDS.length];
+    txt.style.left  = (sx - 38) + 'px';
+    txt.style.top   = (sy - 52) + 'px';
+    splitsCont.appendChild(txt);
+
+    remaining--;
+    updateCounter();
+
+    setTimeout(() => {
+      anim.remove(); txt.remove();
+      if (remaining === 0) {
+        setTimeout(() => { remaining = APPLE_DATA.length; updateCounter(); drawApples(); }, 1400);
+      }
+    }, 950);
+  }
+
+  function updateCounter() {
+    if (remaining > 0) {
+      countEl.textContent = '🍎'.repeat(remaining) + ` ${remaining} manzana${remaining !== 1 ? 's' : ''}`;
+    } else {
+      countEl.textContent = '¡No quedan manzanas! 😄';
+    }
+  }
+
+  drawApples();
 </script>
 </body>
-</html> 
+</html>
