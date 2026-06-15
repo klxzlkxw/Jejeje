@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { 
-            margin: 0; background: #090A0F; color: white; 
-            font-family: sans-serif; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; height: 100vh; overflow: hidden; 
-        }
+        body { margin: 0; background: #090A0F; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
 
-        /* Fondo espacial con estrellas y rocas */
+        /* Fondo espacial */
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: moveDown linear infinite; }
-        .roca { position: absolute; color: #ff4d6d; font-size: 2rem; animation: moveDown linear infinite; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: moveStars linear infinite; }
+        .roca { position: absolute; font-size: 1.5rem; animation: moveStars linear infinite; opacity: 0.6; }
         
-        @keyframes moveDown { from { transform: translateY(-10vh); } to { transform: translateY(110vh); } }
+        @keyframes moveStars { from { transform: translateY(-5vh); } to { transform: translateY(105vh); } }
 
-        h1 { font-size: 3rem; color: #ffb7c5; text-shadow: 0 0 20px #ff4d6d; text-align: center; }
-        p { font-size: 1.2rem; max-width: 600px; text-align: center; color: #e0e0e0; margin-bottom: 30px; }
+        h1 { font-size: 3rem; color: #ffb7c5; text-shadow: 0 0 15px #ff4d6d; text-align: center; }
+        p { font-size: 1.2rem; max-width: 600px; text-align: center; color: #e0e0e0; margin-bottom: 20px; }
         
         button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 30px; margin: 10px; transition: 0.3s; }
         #si { background: #ff4d6d; color: white; }
         #no { background: #555; color: white; }
 
-        #visual { margin-top: 30px; font-size: 6rem; position: relative; }
-        
-        /* Onda en forma de corazón */
+        #visual { margin-top: 20px; font-size: 6rem; position: relative; display: flex; justify-content: center; align-items: center; }
+
+        /* Onda con forma de corazón */
         .onda-corazon { 
-            position: absolute; border: 3px solid #ff4d6d;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            clip-path: path('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+            position: absolute; border: 4px solid #ff4d6d; border-radius: 50%;
             animation: expandirCorazon 2s ease-out forwards; pointer-events: none;
+            display: flex; justify-content: center; align-items: center;
         }
+        .onda-corazon::before { content: "💗"; font-size: 2rem; }
+
         @keyframes expandirCorazon { 
-            0% { width: 50px; height: 50px; opacity: 1; } 
-            100% { width: 400px; height: 400px; opacity: 0; } 
+            0% { width: 50px; height: 50px; opacity: 1; border-radius: 50%; }
+            50% { border-radius: 40% 40% 10% 40%; }
+            100% { width: 400px; height: 400px; opacity: 0; border-radius: 50%; }
         }
     </style>
 </head>
@@ -54,8 +52,9 @@
 
     <script>
         const space = document.getElementById('space');
-        // Estrellas
-        for (let i = 0; i < 100; i++) {
+        
+        // Crear estrellas
+        for (let i = 0; i < 80; i++) {
             const s = document.createElement('div');
             s.className = 'star';
             s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
@@ -63,13 +62,15 @@
             s.style.animationDuration = (Math.random() * 10 + 10) + 's';
             space.appendChild(s);
         }
-        // Rocas corazón (pocas)
-        for (let i = 0; i < 5; i++) {
+
+        // Crear rocas corazón
+        for (let i = 0; i < 6; i++) {
             const r = document.createElement('div');
             r.className = 'roca';
             r.innerHTML = "💗";
             r.style.left = Math.random() * 100 + '%';
-            r.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            r.style.animationDuration = (Math.random() * 8 + 12) + 's';
+            r.style.animationDelay = (Math.random() * 5) + 's';
             space.appendChild(r);
         }
 
@@ -79,7 +80,7 @@
             for(let i=0; i<3; i++) {
                 const o = document.createElement('div');
                 o.className = 'onda-corazon';
-                o.style.animationDelay = (i * 0.4) + "s";
+                o.style.animationDelay = (i * 0.5) + "s";
                 v.appendChild(o);
             }
         }
