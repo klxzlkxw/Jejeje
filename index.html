@@ -1,745 +1,706 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// AUDIO SOURCE — Updated to point to your local file
-// ─────────────────────────────────────────────────────────────────────────────
-const AUDIO_SRC = "./moon-audio.mp3";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LYRICS — timestamps in seconds, text lines
-// ─────────────────────────────────────────────────────────────────────────────
-const LYRICS = [
-  { t: 0,   text: "♪ Moon ♪" },
-  { t: 0,   text: "♪ Moon ♪" },
-  { t: 4,   text: "I'm up in the stars" },
-  { t: 8,   text: "I'm floatin' away" },
-  { t: 12,  text: "The moon is so close" },
-  { t: 16,  text: "I can touch it today" },
-  { t: 20,  text: "I feel like a god" },
-  { t: 24,  text: "Among angels and stars" },
-  { t: 28,  text: "I know what I am" },
-  { t: 32,  text: "I know who we are" },
-  { t: 36,  text: "Moon... moon..." },
-  { t: 40,  text: "Up above the clouds" },
-  { t: 44,  text: "Can you feel me now?" },
-  { t: 48,  text: "I'm reachin' for something" },
-  { t: 52,  text: "Beyond what I've found" },
-  { t: 56,  text: "Moon... moon..." },
-  { t: 60,  text: "North Star, guide me home" },
-  { t: 64,  text: "Through the dark I roam" },
-  { t: 68,  text: "Every scar, every stone" },
-  { t: 72,  text: "Built this throne alone" },
-  { t: 76,  text: "Moon... moon..." },
-  { t: 80,  text: "I see it in your eyes" },
-  { t: 84,  text: "You see it in the skies" },
-  { t: 88,  text: "We are made of light" },
-  { t: 92,  text: "We were born to rise" },
-  { t: 96,  text: "Moon... moon..." },
-  { t: 100, text: "♪ ♪ ♪" },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PIXEL ART — Kanye West sprite (20×32 px grid)
-// Inspired by: Donda-era Kanye — shaved head, full beard, boxy hoodie/jacket,
-// cargo pants, chunky Yeezy 700-style sneakers, signature round shades
-//
-// Palette:
-//  0 = transparent
-//  1 = skin tone        #B5794A
-//  2 = dark beard/hair  #3a2a1a
-//  3 = jacket (black)   #1a1a1a
-//  4 = jacket accent    #2e2e2e
-//  5 = inner/shirt grey #555555
-//  6 = round shades     #0d0d0d
-//  7 = lens shine       #2a3a55
-//  8 = pants (dark)     #1c1c24
-//  9 = Yeezy upper      #7c7570
-//  A(10)= Yeezy sole    #c8b89a
-//  B(11)= Yeezy detail  #a09080
-//  C(12)= teeth/white   #e8e8e0
-//  D(13)= gold chain    #D4AF37
-// ─────────────────────────────────────────────────────────────────────────────
-function drawKanye(ctx, x, y, frame, scale = 2) {
-  const s = scale;
-  const COLS = 20, ROWS = 32;
-
-  const palette = [
-    null,       // 0 transparent
-    "#B5794A",  // 1 skin
-    "#3a2a1a",  // 2 beard/dark
-    "#1a1a1a",  // 3 jacket black
-    "#2e2e2e",  // 4 jacket mid
-    "#555555",  // 5 shirt grey
-    "#0d0d0d",  // 6 shades frame
-    "#1a2a44",  // 7 lens tint
-    "#1c1c24",  // 8 pants
-    "#7c7570",  // 9 yeezy upper
-    "#c8b89a",  // 10 yeezy sole
-    "#a09080",  // 11 yeezy detail
-    "#e8e8e0",  // 12 teeth
-    "#D4AF37",  // 13 gold chain
-  ];
-
-  // 20-wide × 32-tall sprite
-  // Head rows 0-8, neck 9, shoulders/torso 10-20, legs 21-27, shoes 28-31
-  const base = [
-    // ── HEAD (shaved, wide, round) ──
-    [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0], // 0  hair/top stubble
-    [0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 0, 0, 0], // 1
-    [0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0], // 2
-    [0, 0, 2, 1, 1, 6, 7, 7, 6, 1, 1, 6, 7, 7, 6, 1, 1, 2, 0, 0], // 3  shades
-    [0, 0, 2, 1, 1, 6, 7, 7, 6, 2, 2, 6, 7, 7, 6, 1, 1, 2, 0, 0], // 4  bridge
-    [0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0], // 5  nose area
-    [0, 0, 2, 2, 1, 1, 2, 2, 2, 12,12, 2, 2, 2, 1, 1, 2, 2, 0, 0], // 6  mouth/beard top
-    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0], // 7  full beard
-    [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0], // 8  beard bottom
-    // ── NECK ──
-    [0, 0, 0, 0, 0, 3, 2, 1, 1, 1, 1, 1, 1, 2, 3, 0, 0, 0, 0, 0], // 9
-    // ── TORSO / JACKET ──
-    [0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0], // 10 collar
-    [0, 0, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 3, 3, 0, 0], // 11 chest
-    [0, 0, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 3, 0, 0], // 12
-    [0, 3, 3, 4, 5, 5,13,13, 5, 5, 5, 5,13,13, 5, 5, 4, 3, 3, 0], // 13 gold chain
-    [0, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 3, 0], // 14 mid torso
-    [0, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 3, 3, 0], // 15
-    [0, 3, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 3, 3, 3, 0], // 16 jacket pocket area
-    [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0], // 17 waist/belt
-    // ── HIPS ──
-    [0, 0, 3, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 0, 0], // 18
-    // ── LEGS (base = run frame 0) ──
-    [0, 0, 0, 8, 8, 8, 8, 0, 0, 0, 0, 0, 8, 8, 8, 8, 0, 0, 0, 0], // 19 upper legs split
-    [0, 0, 0, 8, 8, 8, 8, 0, 0, 0, 0, 0, 8, 8, 8, 8, 0, 0, 0, 0], // 20
-    [0, 0, 0, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 0, 0, 0, 0], // 21 knees
-    [0, 0, 0, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 0, 0, 0, 0], // 22
-    [0, 0, 0, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 0, 0, 0, 0], // 23 lower legs
-    [0, 0, 0, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 0, 0, 0, 0], // 24
-    // ── YEEZY SHOES ──
-    [0, 0, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 0, 0, 0], // 25 upper shoe
-    [0, 0, 9, 9, 9, 9, 9, 9, 0, 0, 0, 9, 9, 9, 9, 9, 9, 0, 0, 0], // 26 shoe body
-    [0, 0,11, 9, 9, 9, 9, 9, 9, 0, 9, 9, 9, 9, 9, 9,11, 0, 0, 0], // 27 toe box + detail
-    [0, 0,10,10,10,10,10,10,10, 0,10,10,10,10,10,10,10, 0, 0, 0], // 28 chunky sole
-    [0, 0,10,10,10,10,10,10,10, 0,10,10,10,10,10,10,10, 0, 0, 0], // 29 sole thick
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // 30
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // 31
-  ];
-
-  // Run frame 1 — legs alternate, arms swing
-  const runLegs1 = {
-    19: [0,0,0,8,8,8,8,8,0,0,0,0,0,8,8,8,0,0,0,0],
-    20: [0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,0,0,0,0,0],
-    21: [0,0,0,0,8,8,8,8,0,0,0,8,8,8,0,0,0,0,0,0],
-    22: [0,0,0,0,8,8,8,0,0,0,0,0,8,8,8,0,0,0,0,0],
-    23: [0,0,0,0,8,8,8,0,0,0,0,0,0,8,8,8,0,0,0,0],
-    24: [0,0,0,0,8,8,8,0,0,0,0,0,0,8,8,8,0,0,0,0],
-    25: [0,0,9,9,9,9,9,9,0,0,0,0,0,9,9,9,9,0,0,0],
-    26: [0,0,9,9,9,9,9,9,9,0,0,0,9,9,9,9,9,0,0,0],
-    27: [0,0,11,9,9,9,9,9,9,0,0,9,9,9,9,9,11,0,0,0],
-    28: [0,0,10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,0,0,0],
-    29: [0,0,10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,0,0,0],
-  };
-
-  // Jump frame — legs tucked, arms up
-  const jumpRows = {
-    19: [0,0,0,0,0,8,8,8,0,0,0,0,8,8,8,0,0,0,0,0],
-    20: [0,0,0,0,8,8,8,0,0,0,0,0,0,8,8,8,0,0,0,0],
-    21: [0,0,0,8,8,8,0,0,0,0,0,0,0,0,8,8,8,0,0,0],
-    22: [0,0,0,8,8,8,0,0,0,0,0,0,0,0,8,8,8,0,0,0],
-    23: [0,0,9,9,9,9,9,0,0,0,0,0,0,9,9,9,9,9,0,0],
-    24: [0,0,10,10,10,10,10,0,0,0,0,0,10,10,10,10,10,0,0,0],
-    25: [0,0,10,10,10,10,10,0,0,0,0,0,10,10,10,10,10,0,0,0],
-    26: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    27: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    28: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    29: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  };
-
-  const overrides = frame === 1 ? runLegs1 : frame === 2 ? jumpRows : {};
-
-  // Arm swing overlay (painted after body)
-  // frame 0: right arm forward, left back / frame 1: opposite / frame 2: both up
-  function drawArms(ctx, x, y, s, frame) {
-    // left arm
-    const la = frame === 2 ? [11,12] : frame === 1 ? [12,13,14,15] : [13,14,15,16];
-    // right arm
-    const ra = frame === 2 ? [11,12] : frame === 1 ? [13,14,15,16] : [12,13,14,15];
-    const armColor = palette[3];
-    // left arm pixels (left side of torso)
-    if (frame === 2) {
-      // arms raised
-      ctx.fillStyle = palette[3]; for (const r of [9,10,11]) { ctx.fillRect(x+0*s, y+r*s, 2*s, s); }
-      ctx.fillStyle = palette[3]; for (const r of [9,10,11]) { ctx.fillRect(x+18*s, y+r*s, 2*s, s); }
-    } else if (frame === 1) {
-      ctx.fillStyle = palette[3];
-      for (const r of la) ctx.fillRect(x+0*s, y+r*s, 2*s, s);
-      for (const r of ra) ctx.fillRect(x+18*s, y+r*s, 2*s, s);
-    } else {
-      ctx.fillStyle = palette[3];
-      for (const r of la) ctx.fillRect(x+0*s, y+r*s, 2*s, s);
-      for (const r of ra) ctx.fillRect(x+18*s, y+r*s, 2*s, s);
-    }
-  }
-
-  ctx.save();
-  for (let row = 0; row < ROWS; row++) {
-    const rowData = (overrides[row] !== undefined) ? overrides[row] : base[row];
-    if (!rowData) continue;
-    for (let col = 0; col < COLS; col++) {
-      const val = rowData[col];
-      if (!val) continue;
-      ctx.fillStyle = palette[val];
-      ctx.fillRect(x + col * s, y + row * s, s, s);
-    }
-  }
-  drawArms(ctx, x, y, s, frame);
-  ctx.restore();
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// STAR field
-// ─────────────────────────────────────────────────────────────────────────────
-function generateStars(count, W, H) {
-  return Array.from({ length: count }, () => ({
-    x: Math.random() * W,
-    y: Math.random() * H * 0.75,
-    r: Math.random() * 1.5 + 0.5,
-    alpha: Math.random() * 0.7 + 0.3,
-    twinkleSpeed: Math.random() * 0.02 + 0.005,
-    twinklePhase: Math.random() * Math.PI * 2,
-  }));
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MOON renderer
-// ─────────────────────────────────────────────────────────────────────────────
-function drawMoon(ctx, cx, cy, radius) {
-  // Glow
-  const glow = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 2.5);
-  glow.addColorStop(0, "rgba(200,220,255,0.18)");
-  glow.addColorStop(0.4, "rgba(180,200,255,0.07)");
-  glow.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius * 2.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Moon body
-  const moonGrad = ctx.createRadialGradient(cx - radius * 0.25, cy - radius * 0.2, radius * 0.1, cx, cy, radius);
-  moonGrad.addColorStop(0, "#f0f0e8");
-  moonGrad.addColorStop(0.3, "#dcdcd0");
-  moonGrad.addColorStop(0.65, "#c8c8bc");
-  moonGrad.addColorStop(0.85, "#b0b0a4");
-  moonGrad.addColorStop(1, "#989890");
-  ctx.fillStyle = moonGrad;
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Craters
-  const craters = [
-    { dx: -0.28, dy: -0.15, r: 0.13 },
-    { dx: 0.22,  dy: 0.2,   r: 0.09 },
-    { dx: -0.05, dy: 0.3,   r: 0.07 },
-    { dx: 0.35,  dy: -0.25, r: 0.06 },
-    { dx: -0.4,  dy: 0.2,   r: 0.05 },
-    { dx: 0.1,   dy: -0.4,  r: 0.08 },
-    { dx: -0.15, dy: 0.05,  r: 0.04 },
-    { dx: 0.3,   dy: 0.05,  r: 0.05 },
-  ];
-  craters.forEach(({ dx, dy, r }) => {
-    const cx2 = cx + dx * radius;
-    const cy2 = cy + dy * radius;
-    const cr = r * radius;
-    // Shadow rim
-    ctx.beginPath();
-    ctx.arc(cx2, cy2, cr, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(80,80,70,0.25)";
-    ctx.fill();
-    // Highlight
-    const cg = ctx.createRadialGradient(cx2 - cr * 0.3, cy2 - cr * 0.3, 0, cx2, cy2, cr);
-    cg.addColorStop(0, "rgba(255,255,255,0.08)");
-    cg.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = cg;
-    ctx.fill();
-  });
-
-  // Terminator shadow (subtle edge darkening)
-  const shadow = ctx.createRadialGradient(cx + radius * 0.6, cy, 0, cx, cy, radius);
-  shadow.addColorStop(0, "rgba(0,0,0,0)");
-  shadow.addColorStop(0.7, "rgba(0,0,0,0)");
-  shadow.addColorStop(1, "rgba(20,20,30,0.35)");
-  ctx.fillStyle = shadow;
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// OBSTACLE types
-// ─────────────────────────────────────────────────────────────────────────────
-function drawObstacle(ctx, obs) {
-  const { x, y, w, h, type } = obs;
-  if (type === "meteor") {
-    ctx.save();
-    ctx.fillStyle = "#6b5b4e";
-    ctx.strokeStyle = "#a08878";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    // crater detail
-    ctx.fillStyle = "#4a3f38";
-    ctx.beginPath();
-    ctx.arc(x + w * 0.35, y + h * 0.4, w * 0.12, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  } else if (type === "satellite") {
-    ctx.save();
-    // body
-    ctx.fillStyle = "#888";
-    ctx.fillRect(x + w * 0.3, y + h * 0.25, w * 0.4, h * 0.5);
-    // panels
-    ctx.fillStyle = "#2255aa";
-    ctx.fillRect(x, y + h * 0.35, w * 0.28, h * 0.3);
-    ctx.fillRect(x + w * 0.72, y + h * 0.35, w * 0.28, h * 0.3);
-    // antenna
-    ctx.strokeStyle = "#aaa";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(x + w * 0.5, y + h * 0.25);
-    ctx.lineTo(x + w * 0.5, y);
-    ctx.stroke();
-    ctx.restore();
-  } else {
-    // star cluster / nebula cloud
-    ctx.save();
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = "#7c5cbf";
-    ctx.beginPath();
-    ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#a07fe0";
-    ctx.beginPath();
-    ctx.ellipse(x + w * 0.4, y + h * 0.4, w * 0.3, h * 0.3, 0.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GROUND particles
-// ─────────────────────────────────────────────────────────────────────────────
-function drawGround(ctx, W, H, scrollX) {
-  const GROUND_Y = H - 60;
-  // Ground base
-  const gGrad = ctx.createLinearGradient(0, GROUND_Y, 0, H);
-  gGrad.addColorStop(0, "#1a1f35");
-  gGrad.addColorStop(1, "#0a0c18");
-  ctx.fillStyle = gGrad;
-  ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-
-  // Ground edge glow
-  ctx.fillStyle = "rgba(100,120,220,0.15)";
-  ctx.fillRect(0, GROUND_Y, W, 3);
-
-  // Pixel ground details
-  ctx.fillStyle = "#2a3050";
-  for (let i = 0; i < W; i += 8) {
-    const wave = Math.sin((i + scrollX * 0.5) * 0.03) * 3;
-    ctx.fillRect(i, GROUND_Y + wave, 4, 2);
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN GAME COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
-export default function MoonGame() {
-  const canvasRef = useRef(null);
-  const audioRef = useRef(null);
-  const gameStateRef = useRef({
-    running: false,
-    dead: false,
-    score: 0,
-    speed: 5,
-    scrollX: 0,
-    player: { x: 80, y: 0, vy: 0, onGround: true, frame: 0, frameTimer: 0, jumpCount: 0 },
-    obstacles: [],
-    obstacleTimer: 0,
-    obstacleInterval: 120,
-    stars: [],
-    time: 0,
-    highScore: 0,
-  });
-  const animRef = useRef(null);
-  const keysRef = useRef({});
-
-  const [gamePhase, setGamePhase] = useState("idle"); // idle | playing | dead
-  const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [currentLyric, setCurrentLyric] = useState("");
-  const [lyricKey, setLyricKey] = useState(0);
-  const [audioTime, setAudioTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const W = 900, H = 400;
-  const GROUND_Y = H - 60;
-  const PLAYER_W = 40, PLAYER_H = 64;
-  const GRAVITY = 0.7, JUMP_VEL = -14;
-
-  // Init stars once
-  useEffect(() => {
-    gameStateRef.current.stars = generateStars(120, W, H);
-  }, []);
-
-  // Lyrics sync
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!audioRef.current) return;
-      const t = audioRef.current.currentTime;
-      setAudioTime(t);
-      // Find current lyric
-      let lyric = "";
-      for (let i = LYRICS.length - 1; i >= 0; i--) {
-        if (t >= LYRICS[i].t) { lyric = LYRICS[i].text; break; }
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moon · Kanye West Infinite Runner</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #020510;
+        color: #fff;
+        font-family: monospace;
       }
-      setCurrentLyric(prev => {
-        if (prev !== lyric) { setLyricKey(k => k + 1); return lyric; }
-        return prev;
-      });
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
-
-  const jump = useCallback(() => {
-    const gs = gameStateRef.current;
-    if (!gs.running || gs.dead) return;
-    const p = gs.player;
-    if (p.onGround || p.jumpCount < 2) {
-      p.vy = JUMP_VEL;
-      p.onGround = false;
-      p.jumpCount = (p.onGround ? 0 : p.jumpCount) + 1;
-    }
-  }, []);
-
-  const startGame = useCallback(() => {
-    const gs = gameStateRef.current;
-    gs.running = true;
-    gs.dead = false;
-    gs.score = 0;
-    gs.speed = 5;
-    gs.scrollX = 0;
-    gs.obstacles = [];
-    gs.obstacleTimer = 0;
-    gs.obstacleInterval = 120;
-    gs.time = 0;
-    gs.player = { x: 80, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true, frame: 0, frameTimer: 0, jumpCount: 0 };
-    setGamePhase("playing");
-    setScore(0);
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
-  }, []);
-
-  // Input
-  useEffect(() => {
-    const down = (e) => {
-      if (e.code === "Space" || e.code === "ArrowUp") {
-        e.preventDefault();
-        if (gamePhase === "idle" || gamePhase === "dead") startGame();
-        else jump();
+      #root {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      keysRef.current[e.code] = true;
-    };
-    window.addEventListener("keydown", down);
-    return () => window.removeEventListener("keydown", down);
-  }, [gamePhase, jump, startGame]);
+      button {
+        font: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
 
-  // Game loop
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    const loop = (timestamp) => {
-      animRef.current = requestAnimationFrame(loop);
-      const gs = gameStateRef.current;
-      ctx.clearRect(0, 0, W, H);
+    <script type="text/babel">
+      const { useState, useEffect, useRef, useCallback } = React;
+      const AUDIO_SRC = "./moon-audio.mp3";
 
-      // ── Background ──
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-      skyGrad.addColorStop(0, "#020510");
-      skyGrad.addColorStop(0.5, "#05091e");
-      skyGrad.addColorStop(1, "#0c1235");
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, W, H);
+      const LYRICS = [
+        { t: 0, text: "♪ Moon ♪" },
+        { t: 0, text: "♪ Moon ♪" },
+        { t: 4, text: "I'm up in the stars" },
+        { t: 8, text: "I'm floatin' away" },
+        { t: 12, text: "The moon is so close" },
+        { t: 16, text: "I can touch it today" },
+        { t: 20, text: "I feel like a god" },
+        { t: 24, text: "Among angels and stars" },
+        { t: 28, text: "I know what I am" },
+        { t: 32, text: "I know who we are" },
+        { t: 36, text: "Moon... moon..." },
+        { t: 40, text: "Up above the clouds" },
+        { t: 44, text: "Can you feel me now?" },
+        { t: 48, text: "I'm reachin' for something" },
+        { t: 52, text: "Beyond what I've found" },
+        { t: 56, text: "Moon... moon..." },
+        { t: 60, text: "North Star, guide me home" },
+        { t: 64, text: "Through the dark I roam" },
+        { t: 68, text: "Every scar, every stone" },
+        { t: 72, text: "Built this throne alone" },
+        { t: 76, text: "Moon... moon..." },
+        { t: 80, text: "I see it in your eyes" },
+        { t: 84, text: "You see it in the skies" },
+        { t: 88, text: "We are made of light" },
+        { t: 92, text: "We were born to rise" },
+        { t: 96, text: "Moon... moon..." },
+        { t: 100, text: "♪ ♪ ♪" },
+      ];
 
-      // Stars
-      gs.time = (gs.time || 0) + 0.016;
-      gs.stars.forEach(star => {
-        const alpha = star.alpha * (0.7 + 0.3 * Math.sin(gs.time * star.twinkleSpeed * 100 + star.twinklePhase));
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(((star.x - gs.scrollX * 0.05) % W + W) % W, star.y, star.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
+      function drawKanye(ctx, x, y, frame, scale = 2) {
+        const s = scale;
+        const COLS = 20,
+          ROWS = 32;
+        const palette = [
+          null,
+          "#B5794A",
+          "#3a2a1a",
+          "#1a1a1a",
+          "#2e2e2e",
+          "#555555",
+          "#0d0d0d",
+          "#1a2a44",
+          "#1c1c24",
+          "#7c7570",
+          "#c8b89a",
+          "#a09080",
+          "#e8e8e0",
+          "#D4AF37",
+        ];
 
-      // Moon
-      drawMoon(ctx, W * 0.78, H * 0.28, 70);
+        const base = [
+          [0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0],
+          [0,0,0,2,1,1,1,1,1,1,1,1,1,1,1,2,2,0,0,0],
+          [0,0,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,0,0],
+          [0,0,2,1,1,6,7,7,6,1,1,6,7,7,6,1,1,2,0,0],
+          [0,0,2,1,1,6,7,7,6,2,2,6,7,7,6,1,1,2,0,0],
+          [0,0,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,0,0],
+          [0,0,2,2,1,1,2,2,2,12,12,2,2,2,1,1,2,2,0,0],
+          [0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0],
+          [0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0],
+          [0,0,0,0,0,3,2,1,1,1,1,1,1,2,3,0,0,0,0,0],
+          [0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0],
+          [0,0,3,3,4,4,5,5,5,5,5,5,5,5,4,4,3,3,0,0],
+          [0,0,3,4,4,5,5,5,5,5,5,5,5,5,5,4,4,3,0,0],
+          [0,3,3,4,5,5,13,13,5,5,5,5,13,13,5,5,4,3,3,0],
+          [0,3,3,4,5,5,5,5,5,5,5,5,5,5,5,5,4,3,3,0],
+          [0,3,3,4,4,5,5,5,5,5,5,5,5,5,5,4,4,3,3,0],
+          [0,3,3,3,4,4,5,5,5,5,5,5,5,5,4,4,3,3,3,0],
+          [0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0],
+          [0,0,3,8,8,8,8,8,8,8,8,8,8,8,8,8,8,3,0,0],
+          [0,0,0,8,8,8,8,0,0,0,0,0,8,8,8,8,0,0,0,0],
+          [0,0,0,8,8,8,8,0,0,0,0,0,8,8,8,8,0,0,0,0],
+          [0,0,0,8,8,8,0,0,0,0,0,0,0,8,8,8,0,0,0,0],
+          [0,0,0,8,8,8,0,0,0,0,0,0,0,8,8,8,0,0,0,0],
+          [0,0,0,8,8,8,0,0,0,0,0,0,0,8,8,8,0,0,0,0],
+          [0,0,9,9,9,9,9,0,0,0,0,0,9,9,9,9,9,0,0,0],
+          [0,0,9,9,9,9,9,9,0,0,0,9,9,9,9,9,9,0,0,0],
+          [0,0,11,9,9,9,9,9,9,0,9,9,9,9,9,9,11,0,0,0],
+          [0,0,10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,0,0,0],
+          [0,0,10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,0,0,0],
+          [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+          [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        ];
 
-      // Ground
-      drawGround(ctx, W, H, gs.scrollX);
+        const runLegs1 = {
+          19: [0,0,0,8,8,8,8,8,0,0,0,0,0,8,8,8,0,0,0,0],
+          20: [0,0,0,8,8,8,8,8,0,0,0,0,8,8,8,0,0,0,0,0],
+          21: [0,0,0,0,8,8,8,8,0,0,0,8,8,8,0,0,0,0,0,0],
+          22: [0,0,0,0,8,8,8,0,0,0,0,0,8,8,8,0,0,0,0,0],
+          23: [0,0,0,0,8,8,8,0,0,0,0,0,0,8,8,8,0,0,0,0],
+          24: [0,0,0,0,8,8,8,0,0,0,0,0,0,8,8,8,0,0,0,0],
+          25: [0,0,9,9,9,9,9,9,0,0,0,0,0,9,9,9,9,0,0,0],
+          26: [0,0,9,9,9,9,9,9,9,0,0,0,9,9,9,9,9,0,0,0],
+          27: [0,0,11,9,9,9,9,9,9,0,0,9,9,9,9,9,11,0,0,0],
+          28: [0,0,10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,0,0,0],
+          29: [0,0,10,10,10,10,10,10,10,0,10,10,10,10,10,10,10,0,0,0],
+        };
 
-      if (gs.running && !gs.dead) {
-        gs.scrollX += gs.speed;
-        gs.score += 1;
-        gs.speed = 5 + Math.floor(gs.score / 500) * 0.5;
-        gs.obstacleInterval = Math.max(60, 120 - Math.floor(gs.score / 300) * 5);
+        const jumpRows = {
+          19: [0,0,0,0,0,8,8,8,0,0,0,0,8,8,8,0,0,0,0,0],
+          20: [0,0,0,0,8,8,8,0,0,0,0,0,0,8,8,8,0,0,0,0],
+          21: [0,0,0,8,8,8,0,0,0,0,0,0,0,0,8,8,8,0,0,0],
+          22: [0,0,0,8,8,8,0,0,0,0,0,0,0,0,8,8,8,0,0,0],
+          23: [0,0,9,9,9,9,9,0,0,0,0,0,0,9,9,9,9,9,0,0],
+          24: [0,0,10,10,10,10,10,0,0,0,0,0,10,10,10,10,10,0,0,0],
+          25: [0,0,10,10,10,10,10,0,0,0,0,0,10,10,10,10,10,0,0,0],
+          26: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+          27: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+          28: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+          29: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        };
 
-        // Player physics
-        const p = gs.player;
-        p.vy += GRAVITY;
-        p.y += p.vy;
-        if (p.y >= GROUND_Y - PLAYER_H) {
-          p.y = GROUND_Y - PLAYER_H;
-          p.vy = 0;
-          p.onGround = true;
-          p.jumpCount = 0;
-        } else {
-          p.onGround = false;
-        }
+        const overrides = frame === 1 ? runLegs1 : frame === 2 ? jumpRows : {};
 
-        // Animate frames
-        p.frameTimer++;
-        if (p.frameTimer > 8) {
-          p.frameTimer = 0;
-          p.frame = p.onGround ? (p.frame === 0 ? 1 : 0) : 2;
-        }
-
-        // Obstacles
-        gs.obstacleTimer++;
-        if (gs.obstacleTimer >= gs.obstacleInterval) {
-          gs.obstacleTimer = 0;
-          const types = ["meteor", "satellite", "nebula"];
-          const type = types[Math.floor(Math.random() * types.length)];
-          const w = 38 + Math.random() * 20;
-          const h = 38 + Math.random() * 15;
-          gs.obstacles.push({ x: W + 20, y: GROUND_Y - h, w, h, type });
-        }
-        gs.obstacles = gs.obstacles.filter(o => o.x + o.w > -10);
-        gs.obstacles.forEach(o => { o.x -= gs.speed; });
-
-        // Collision
-        const p_left = p.x + 8, p_right = p.x + PLAYER_W - 8;
-        const p_top = p.y + 8, p_bot = p.y + PLAYER_H - 4;
-        for (const o of gs.obstacles) {
-          if (p_right > o.x + 4 && p_left < o.x + o.w - 4 && p_bot > o.y + 4 && p_top < o.y + o.h - 4) {
-            gs.dead = true;
-            gs.running = false;
-            if (gs.score > gs.highScore) gs.highScore = gs.score;
-            setHighScore(gs.highScore);
-            setGamePhase("dead");
-            if (audioRef.current) { audioRef.current.pause(); setIsPlaying(false); }
-            break;
+        function drawArms(ctx, x, y, s, frame) {
+          const la = frame === 2 ? [11,12] : frame === 1 ? [12,13,14,15] : [13,14,15,16];
+          const ra = frame === 2 ? [11,12] : frame === 1 ? [13,14,15,16] : [12,13,14,15];
+          ctx.fillStyle = palette[3];
+          if (frame === 2) {
+            for (const r of [9,10,11]) ctx.fillRect(x + 0 * s, y + r * s, 2 * s, s);
+            for (const r of [9,10,11]) ctx.fillRect(x + 18 * s, y + r * s, 2 * s, s);
+          } else {
+            for (const r of la) ctx.fillRect(x + 0 * s, y + r * s, 2 * s, s);
+            for (const r of ra) ctx.fillRect(x + 18 * s, y + r * s, 2 * s, s);
           }
         }
 
-        setScore(Math.floor(gs.score / 10));
+        ctx.save();
+        for (let row = 0; row < ROWS; row++) {
+          const rowData = overrides[row] !== undefined ? overrides[row] : base[row];
+          if (!rowData) continue;
+          for (let col = 0; col < COLS; col++) {
+            const val = rowData[col];
+            if (!val) continue;
+            ctx.fillStyle = palette[val];
+            ctx.fillRect(x + col * s, y + row * s, s, s);
+          }
+        }
+        drawArms(ctx, x, y, s, frame);
+        ctx.restore();
       }
 
-      // Draw obstacles
-      gs.obstacles.forEach(o => drawObstacle(ctx, o));
+      function generateStars(count, W, H) {
+        return Array.from({ length: count }, () => ({
+          x: Math.random() * W,
+          y: Math.random() * H * 0.75,
+          r: Math.random() * 1.5 + 0.5,
+          alpha: Math.random() * 0.7 + 0.3,
+          twinkleSpeed: Math.random() * 0.02 + 0.005,
+          twinklePhase: Math.random() * Math.PI * 2,
+        }));
+      }
 
-      // Draw Kanye
-      const p = gs.player;
-      const spriteScale = 2;
-      drawKanye(ctx, p.x - 4, p.y, p.frame, spriteScale);
+      function drawMoon(ctx, cx, cy, radius) {
+        const glow = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 2.5);
+        glow.addColorStop(0, "rgba(200,220,255,0.18)");
+        glow.addColorStop(0.4, "rgba(180,200,255,0.07)");
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Score display
-      ctx.fillStyle = "rgba(255,255,255,0.6)";
-      ctx.font = "bold 14px monospace";
-      ctx.textAlign = "right";
-      ctx.fillText(`${String(Math.floor(gs.score / 10)).padStart(5, "0")}`, W - 16, 28);
-      ctx.textAlign = "left";
+        const moonGrad = ctx.createRadialGradient(cx - radius * 0.25, cy - radius * 0.2, radius * 0.1, cx, cy, radius);
+        moonGrad.addColorStop(0, "#f0f0e8");
+        moonGrad.addColorStop(0.3, "#dcdcd0");
+        moonGrad.addColorStop(0.65, "#c8c8bc");
+        moonGrad.addColorStop(0.85, "#b0b0a4");
+        moonGrad.addColorStop(1, "#989890");
+        ctx.fillStyle = moonGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Idle / Dead overlay
-      if (!gs.running) {
-        ctx.fillStyle = "rgba(5,8,25,0.55)";
-        ctx.fillRect(0, 0, W, H);
+        const craters = [
+          { dx: -0.28, dy: -0.15, r: 0.13 },
+          { dx: 0.22, dy: 0.2, r: 0.09 },
+          { dx: -0.05, dy: 0.3, r: 0.07 },
+          { dx: 0.35, dy: -0.25, r: 0.06 },
+          { dx: -0.4, dy: 0.2, r: 0.05 },
+          { dx: 0.1, dy: -0.4, r: 0.08 },
+          { dx: -0.15, dy: 0.05, r: 0.04 },
+          { dx: 0.3, dy: 0.05, r: 0.05 },
+        ];
+        craters.forEach(({ dx, dy, r }) => {
+          const cx2 = cx + dx * radius;
+          const cy2 = cy + dy * radius;
+          const cr = r * radius;
+          ctx.beginPath();
+          ctx.arc(cx2, cy2, cr, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(80,80,70,0.25)";
+          ctx.fill();
+          const cg = ctx.createRadialGradient(cx2 - cr * 0.3, cy2 - cr * 0.3, 0, cx2, cy2, cr);
+          cg.addColorStop(0, "rgba(255,255,255,0.08)");
+          cg.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = cg;
+          ctx.fill();
+        });
 
-        if (gamePhase === "dead") {
-          ctx.fillStyle = "#e0d0ff";
-          ctx.font = "bold 32px monospace";
-          ctx.textAlign = "center";
-          ctx.fillText("GAME OVER", W / 2, H / 2 - 30);
-          ctx.font = "16px monospace";
-          ctx.fillStyle = "#a090cc";
-          ctx.fillText(`Score: ${Math.floor(gs.score / 10)}  ·  Best: ${Math.floor(gs.highScore / 10)}`, W / 2, H / 2 + 5);
-          ctx.fillStyle = "rgba(255,255,255,0.5)";
-          ctx.font = "14px monospace";
-          ctx.fillText("SPACE or TAP to try again", W / 2, H / 2 + 40);
-          ctx.textAlign = "left";
+        const shadow = ctx.createRadialGradient(cx + radius * 0.6, cy, 0, cx, cy, radius);
+        shadow.addColorStop(0, "rgba(0,0,0,0)");
+        shadow.addColorStop(0.7, "rgba(0,0,0,0)");
+        shadow.addColorStop(1, "rgba(20,20,30,0.35)");
+        ctx.fillStyle = shadow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawObstacle(ctx, obs) {
+        const { x, y, w, h, type } = obs;
+        if (type === "meteor") {
+          ctx.save();
+          ctx.fillStyle = "#6b5b4e";
+          ctx.strokeStyle = "#a08878";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, -0.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#4a3f38";
+          ctx.beginPath();
+          ctx.arc(x + w * 0.35, y + h * 0.4, w * 0.12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (type === "satellite") {
+          ctx.save();
+          ctx.fillStyle = "#888";
+          ctx.fillRect(x + w * 0.3, y + h * 0.25, w * 0.4, h * 0.5);
+          ctx.fillStyle = "#2255aa";
+          ctx.fillRect(x, y + h * 0.35, w * 0.28, h * 0.3);
+          ctx.fillRect(x + w * 0.72, y + h * 0.35, w * 0.28, h * 0.3);
+          ctx.strokeStyle = "#aaa";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(x + w * 0.5, y + h * 0.25);
+          ctx.lineTo(x + w * 0.5, y);
+          ctx.stroke();
+          ctx.restore();
         } else {
-          ctx.fillStyle = "#c8b8ff";
-          ctx.font = "bold 36px monospace";
-          ctx.textAlign = "center";
-          ctx.fillText("MOON", W / 2, H / 2 - 20);
-          ctx.font = "14px monospace";
-          ctx.fillStyle = "rgba(255,255,255,0.55)";
-          ctx.fillText("SPACE or TAP to start", W / 2, H / 2 + 20);
-          ctx.textAlign = "left";
+          ctx.save();
+          ctx.globalAlpha = 0.85;
+          ctx.fillStyle = "#7c5cbf";
+          ctx.beginPath();
+          ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#a07fe0";
+          ctx.beginPath();
+          ctx.ellipse(x + w * 0.4, y + h * 0.4, w * 0.3, h * 0.3, 0.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
         }
       }
-    };
 
-    animRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animRef.current);
-  }, [gamePhase]);
-
-  const toggleAudio = () => {
-    if (!audioRef.current) return;
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    } else {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  return (
-    <div style={{
-      background: "#020510",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "monospace",
-      userSelect: "none",
-      padding: "20px",
-    }}>
-      {/* Title */}
-      <div style={{ marginBottom: 16, textAlign: "center" }}>
-        <h1 style={{ color: "#c8b8ff", fontSize: 28, fontWeight: 700, letterSpacing: "0.35em", margin: 0, textTransform: "uppercase" }}>
-          MOON
-        </h1>
-        <p style={{ color: "#6655aa", fontSize: 12, margin: "4px 0 0", letterSpacing: "0.2em" }}>
-          Kanye West · Infinite Runner
-        </p>
-      </div>
-
-      {/* Canvas wrapper */}
-      <div style={{ position: "relative", borderRadius: 8, overflow: "hidden", boxShadow: "0 0 60px rgba(140,100,255,0.2), 0 0 120px rgba(80,60,180,0.1)" }}>
-        <canvas
-          ref={canvasRef}
-          width={W}
-          height={H}
-          style={{ display: "block", cursor: "pointer", maxWidth: "100%", imageRendering: "pixelated" }}
-          onClick={() => {
-            if (gamePhase === "idle" || gamePhase === "dead") startGame();
-            else jump();
-          }}
-        />
-
-        {/* Lyrics overlay */}
-        {currentLyric && gamePhase === "playing" && (
-          <div
-            key={lyricKey}
-            style={{
-              position: "absolute",
-              bottom: 72,
-              left: 16,
-              background: "rgba(5,8,25,0.65)",
-              backdropFilter: "blur(4px)",
-              border: "1px solid rgba(200,180,255,0.2)",
-              borderRadius: 6,
-              padding: "6px 14px",
-              color: "#e8d8ff",
-              fontSize: 15,
-              fontStyle: "italic",
-              letterSpacing: "0.04em",
-              maxWidth: 320,
-              animation: "lyricFade 0.4s ease",
-              pointerEvents: "none",
-            }}
-          >
-            {currentLyric}
-          </div>
-        )}
-
-        {/* ── MINI PLAYER — top-left corner ── */}
-        <div style={{
-          position: "absolute",
-          top: 12,
-          left: 12,
-          background: "rgba(4,6,20,0.82)",
-          backdropFilter: "blur(8px)",
-          border: "1px solid rgba(200,180,255,0.18)",
-          borderRadius: 10,
-          padding: "8px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          minWidth: 210,
-          boxShadow: "0 2px 20px rgba(100,80,200,0.18)",
-          pointerEvents: "all",
-        }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 6,
-            background: "radial-gradient(circle at 35% 35%, #3a1a5e, #0a0a1a)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, fontSize: 18, border: "1px solid rgba(200,180,255,0.15)",
-          }}>🌙</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: "#e8d8ff", fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Moon</div>
-            <div style={{ color: "rgba(180,150,255,0.65)", fontSize: 10, letterSpacing: "0.06em", marginTop: 2 }}>Kanye West · Donda</div>
-            <div style={{ marginTop: 5, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${Math.min(100, (audioTime / 200) * 100)}%`, background: "linear-gradient(90deg, #8855ff, #cc88ff)", borderRadius: 2, transition: "width 0.2s linear" }} />
-            </div>
-          </div>
-          <button onClick={toggleAudio} style={{
-            background: "rgba(180,140,255,0.15)", border: "1px solid rgba(200,160,255,0.3)",
-            borderRadius: "50%", width: 28, height: 28, cursor: "pointer",
-            color: "#c8a8ff", fontSize: 12, display: "flex", alignItems: "center",
-            justifyContent: "center", flexShrink: 0, padding: 0, lineHeight: 1,
-          }}>{isPlaying ? "⏸" : "▶"}</button>
-        </div>
-      </div>
-
-      {/* Controls bar */}
-      <div style={{
-        marginTop: 16,
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
-        color: "rgba(180,160,255,0.55)",
-        fontSize: 12,
-        letterSpacing: "0.08em",
-      }}>
-        <span>SPACE / TAP = Jump · Double Jump available</span>
-      </div>
-
-      {/* Audio element */}
-      <audio
-        ref={audioRef}
-        src={AUDIO_SRC}
-        loop
-        style={{ display: "none" }}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
-
-      {/* Lyric fade animation */}
-      <style>{`
-        @keyframes lyricFade {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
+      function drawGround(ctx, W, H, scrollX) {
+        const GROUND_Y = H - 60;
+        const gGrad = ctx.createLinearGradient(0, GROUND_Y, 0, H);
+        gGrad.addColorStop(0, "#1a1f35");
+        gGrad.addColorStop(1, "#0a0c18");
+        ctx.fillStyle = gGrad;
+        ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+        ctx.fillStyle = "rgba(100,120,220,0.15)";
+        ctx.fillRect(0, GROUND_Y, W, 3);
+        ctx.fillStyle = "#2a3050";
+        for (let i = 0; i < W; i += 8) {
+          const wave = Math.sin((i + scrollX * 0.5) * 0.03) * 3;
+          ctx.fillRect(i, GROUND_Y + wave, 4, 2);
         }
-      `}</style>
-    </div>
-  );
-}
+      }
+
+      function MoonGame() {
+        const canvasRef = useRef(null);
+        const audioRef = useRef(null);
+        const gameStateRef = useRef({
+          running: false,
+          dead: false,
+          score: 0,
+          speed: 5,
+          scrollX: 0,
+          player: { x: 80, y: 0, vy: 0, onGround: true, frame: 0, frameTimer: 0, jumpCount: 0 },
+          obstacles: [],
+          obstacleTimer: 0,
+          obstacleInterval: 120,
+          stars: [],
+          time: 0,
+          highScore: 0,
+        });
+        const animRef = useRef(null);
+        const [gamePhase, setGamePhase] = useState("idle");
+        const [score, setScore] = useState(0);
+        const [highScore, setHighScore] = useState(0);
+        const [currentLyric, setCurrentLyric] = useState("");
+        const [lyricKey, setLyricKey] = useState(0);
+        const [audioTime, setAudioTime] = useState(0);
+        const [isPlaying, setIsPlaying] = useState(false);
+
+        const W = 900;
+        const H = 400;
+        const GROUND_Y = H - 60;
+        const PLAYER_W = 40;
+        const PLAYER_H = 64;
+        const GRAVITY = 0.7;
+        const JUMP_VEL = -14;
+
+        useEffect(() => {
+          gameStateRef.current.stars = generateStars(120, W, H);
+        }, []);
+
+        useEffect(() => {
+          const interval = setInterval(() => {
+            if (!audioRef.current) return;
+            const t = audioRef.current.currentTime;
+            setAudioTime(t);
+            let lyric = "";
+            for (let i = LYRICS.length - 1; i >= 0; i--) {
+              if (t >= LYRICS[i].t) {
+                lyric = LYRICS[i].text;
+                break;
+              }
+            }
+            setCurrentLyric(prev => {
+              if (prev !== lyric) {
+                setLyricKey(k => k + 1);
+                return lyric;
+              }
+              return prev;
+            });
+          }, 200);
+          return () => clearInterval(interval);
+        }, []);
+
+        const jump = useCallback(() => {
+          const gs = gameStateRef.current;
+          if (!gs.running || gs.dead) return;
+          const p = gs.player;
+          if (p.onGround || p.jumpCount < 2) {
+            p.vy = JUMP_VEL;
+            p.onGround = false;
+            p.jumpCount = (p.onGround ? 0 : p.jumpCount) + 1;
+          }
+        }, []);
+
+        const startGame = useCallback(() => {
+          const gs = gameStateRef.current;
+          gs.running = true;
+          gs.dead = false;
+          gs.score = 0;
+          gs.speed = 5;
+          gs.scrollX = 0;
+          gs.obstacles = [];
+          gs.obstacleTimer = 0;
+          gs.obstacleInterval = 120;
+          gs.time = 0;
+          gs.player = { x: 80, y: GROUND_Y - PLAYER_H, vy: 0, onGround: true, frame: 0, frameTimer: 0, jumpCount: 0 };
+          setGamePhase("playing");
+          setScore(0);
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {});
+            setIsPlaying(true);
+          }
+        }, [GROUND_Y, PLAYER_H]);
+
+        useEffect(() => {
+          const down = (e) => {
+            if (e.code === "Space" || e.code === "ArrowUp") {
+              e.preventDefault();
+              if (gamePhase === "idle" || gamePhase === "dead") {
+                startGame();
+              } else {
+                jump();
+              }
+            }
+          };
+          window.addEventListener("keydown", down);
+          return () => window.removeEventListener("keydown", down);
+        }, [gamePhase, jump, startGame]);
+
+        useEffect(() => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const ctx = canvas.getContext("2d");
+
+          const loop = () => {
+            animRef.current = requestAnimationFrame(loop);
+            const gs = gameStateRef.current;
+            ctx.clearRect(0, 0, W, H);
+
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+            skyGrad.addColorStop(0, "#020510");
+            skyGrad.addColorStop(0.5, "#05091e");
+            skyGrad.addColorStop(1, "#0c1235");
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            gs.time = (gs.time || 0) + 0.016;
+            gs.stars.forEach(star => {
+              const alpha = star.alpha * (0.7 + 0.3 * Math.sin(gs.time * star.twinkleSpeed * 100 + star.twinklePhase));
+              ctx.globalAlpha = alpha;
+              ctx.fillStyle = "#ffffff";
+              ctx.beginPath();
+              ctx.arc(((star.x - gs.scrollX * 0.05) % W + W) % W, star.y, star.r, 0, Math.PI * 2);
+              ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            drawMoon(ctx, W * 0.78, H * 0.28, 70);
+            drawGround(ctx, W, H, gs.scrollX);
+
+            if (gs.running && !gs.dead) {
+              gs.scrollX += gs.speed;
+              gs.score += 1;
+              gs.speed = 5 + Math.floor(gs.score / 500) * 0.5;
+              gs.obstacleInterval = Math.max(60, 120 - Math.floor(gs.score / 300) * 5);
+
+              const p = gs.player;
+              p.vy += GRAVITY;
+              p.y += p.vy;
+              if (p.y >= GROUND_Y - PLAYER_H) {
+                p.y = GROUND_Y - PLAYER_H;
+                p.vy = 0;
+                p.onGround = true;
+                p.jumpCount = 0;
+              } else {
+                p.onGround = false;
+              }
+
+              p.frameTimer += 1;
+              if (p.frameTimer > 8) {
+                p.frameTimer = 0;
+                p.frame = p.onGround ? (p.frame === 0 ? 1 : 0) : 2;
+              }
+
+              gs.obstacleTimer += 1;
+              if (gs.obstacleTimer >= gs.obstacleInterval) {
+                gs.obstacleTimer = 0;
+                const types = ["meteor", "satellite", "nebula"];
+                const type = types[Math.floor(Math.random() * types.length)];
+                const w = 38 + Math.random() * 20;
+                const h = 38 + Math.random() * 15;
+                gs.obstacles.push({ x: W + 20, y: GROUND_Y - h, w, h, type });
+              }
+              gs.obstacles = gs.obstacles.filter(o => o.x + o.w > -10);
+              gs.obstacles.forEach(o => { o.x -= gs.speed; });
+
+              const p_left = p.x + 8;
+              const p_right = p.x + PLAYER_W - 8;
+              const p_top = p.y + 8;
+              const p_bot = p.y + PLAYER_H - 4;
+
+              for (const o of gs.obstacles) {
+                if (p_right > o.x + 4 && p_left < o.x + o.w - 4 && p_bot > o.y + 4 && p_top < o.y + o.h - 4) {
+                  gs.dead = true;
+                  gs.running = false;
+                  if (gs.score > gs.highScore) gs.highScore = gs.score;
+                  setHighScore(gs.highScore);
+                  setGamePhase("dead");
+                  if (audioRef.current) {
+                    audioRef.current.pause();
+                    setIsPlaying(false);
+                  }
+                  break;
+                }
+              }
+
+              setScore(Math.floor(gs.score / 10));
+            }
+
+            gs.obstacles.forEach(o => drawObstacle(ctx, o));
+            drawKanye(ctx, gs.player.x - 4, gs.player.y, gs.player.frame, 2);
+
+            ctx.fillStyle = "rgba(255,255,255,0.6)";
+            ctx.font = "bold 14px monospace";
+            ctx.textAlign = "right";
+            ctx.fillText(`${String(Math.floor(gs.score / 10)).padStart(5, "0")}`, W - 16, 28);
+            ctx.textAlign = "left";
+
+            if (!gs.running) {
+              ctx.fillStyle = "rgba(5,8,25,0.55)";
+              ctx.fillRect(0, 0, W, H);
+              if (gamePhase === "dead") {
+                ctx.fillStyle = "#e0d0ff";
+                ctx.font = "bold 32px monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("GAME OVER", W / 2, H / 2 - 30);
+                ctx.font = "16px monospace";
+                ctx.fillStyle = "#a090cc";
+                ctx.fillText(`Score: ${Math.floor(gs.score / 10)}  ·  Best: ${Math.floor(gs.highScore / 10)}`, W / 2, H / 2 + 5);
+                ctx.fillStyle = "rgba(255,255,255,0.5)";
+                ctx.font = "14px monospace";
+                ctx.fillText("SPACE or TAP to try again", W / 2, H / 2 + 40);
+                ctx.textAlign = "left";
+              } else {
+                ctx.fillStyle = "#c8b8ff";
+                ctx.font = "bold 36px monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("MOON", W / 2, H / 2 - 20);
+                ctx.font = "14px monospace";
+                ctx.fillStyle = "rgba(255,255,255,0.55)";
+                ctx.fillText("SPACE or TAP to start", W / 2, H / 2 + 20);
+                ctx.textAlign = "left";
+              }
+            }
+          };
+
+          animRef.current = requestAnimationFrame(loop);
+          return () => cancelAnimationFrame(animRef.current);
+        }, [gamePhase]);
+
+        const toggleAudio = () => {
+          if (!audioRef.current) return;
+          if (audioRef.current.paused) {
+            audioRef.current.play().catch(() => {});
+            setIsPlaying(true);
+          } else {
+            audioRef.current.pause();
+            setIsPlaying(false);
+          }
+        };
+
+        const audioDuration = audioRef.current?.duration || 1;
+        const progressWidth = Math.min(100, (audioTime / audioDuration) * 100);
+
+        return (
+          <div style={{
+            background: "#020510",
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "monospace",
+            userSelect: "none",
+            padding: "20px",
+          }}>
+            <div style={{ marginBottom: 16, textAlign: "center" }}>
+              <h1 style={{ color: "#c8b8ff", fontSize: 28, fontWeight: 700, letterSpacing: "0.35em", margin: 0, textTransform: "uppercase" }}>
+                MOON
+              </h1>
+              <p style={{ color: "#6655aa", fontSize: 12, margin: "4px 0 0", letterSpacing: "0.2em" }}>
+                Kanye West · Infinite Runner
+              </p>
+            </div>
+            <div style={{ position: "relative", borderRadius: 8, overflow: "hidden", boxShadow: "0 0 60px rgba(140,100,255,0.2), 0 0 120px rgba(80,60,180,0.1)" }}>
+              <canvas
+                ref={canvasRef}
+                width={W}
+                height={H}
+                style={{ display: "block", cursor: "pointer", maxWidth: "100%", imageRendering: "pixelated" }}
+                onClick={() => {
+                  if (gamePhase === "idle" || gamePhase === "dead") {
+                    startGame();
+                  } else {
+                    jump();
+                  }
+                }}
+              />
+              {currentLyric && gamePhase === "playing" && (
+                <div
+                  key={lyricKey}
+                  style={{
+                    position: "absolute",
+                    bottom: 72,
+                    left: 16,
+                    background: "rgba(5,8,25,0.65)",
+                    backdropFilter: "blur(4px)",
+                    border: "1px solid rgba(200,180,255,0.2)",
+                    borderRadius: 6,
+                    padding: "6px 14px",
+                    color: "#e8d8ff",
+                    fontSize: 15,
+                    fontStyle: "italic",
+                    letterSpacing: "0.04em",
+                    maxWidth: 320,
+                    animation: "lyricFade 0.4s ease",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {currentLyric}
+                </div>
+              )}
+              <div style={{
+                position: "absolute",
+                top: 12,
+                left: 12,
+                background: "rgba(4,6,20,0.82)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(200,180,255,0.18)",
+                borderRadius: 10,
+                padding: "8px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                minWidth: 210,
+                boxShadow: "0 2px 20px rgba(100,80,200,0.18)",
+                pointerEvents: "all",
+              }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 6,
+                  background: "radial-gradient(circle at 35% 35%, #3a1a5e, #0a0a1a)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  fontSize: 18,
+                  border: "1px solid rgba(200,180,255,0.15)",
+                }}>🌙</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: "#e8d8ff", fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Moon</div>
+                  <div style={{ color: "rgba(180,150,255,0.65)", fontSize: 10, letterSpacing: "0.06em", marginTop: 2 }}>Kanye West · Donda</div>
+                  <div style={{ marginTop: 5, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${progressWidth}%`, background: "linear-gradient(90deg, #8855ff, #cc88ff)", borderRadius: 2, transition: "width 0.2s linear" }} />
+                  </div>
+                </div>
+                <button onClick={toggleAudio} style={{
+                  background: "rgba(180,140,255,0.15)",
+                  border: "1px solid rgba(200,160,255,0.3)",
+                  borderRadius: "50%",
+                  width: 28,
+                  height: 28,
+                  cursor: "pointer",
+                  color: "#c8a8ff",
+                  fontSize: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  padding: 0,
+                  lineHeight: 1,
+                }}>
+                  {isPlaying ? "⏸" : "▶"}
+                </button>
+              </div>
+            </div>
+            <div style={{
+              marginTop: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              color: "rgba(180,160,255,0.55)",
+              fontSize: 12,
+              letterSpacing: "0.08em",
+            }}>
+              <span>SPACE / TAP = Jump · Double Jump available</span>
+            </div>
+            <audio
+              ref={audioRef}
+              src={AUDIO_SRC}
+              loop
+              style={{ display: "none" }}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            />
+            <style>{`
+              @keyframes lyricFade {
+                from { opacity: 0; transform: translateY(6px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<MoonGame />);
+    </script>
+  </body>
+</html>
