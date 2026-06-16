@@ -2,59 +2,73 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Moon - Kanye Runner</title>
+    <title>Moon - Kanye West Game</title>
     <style>
         body { margin: 0; background: #020510; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; font-family: monospace; }
-        canvas { border: 1px solid #333; background: #020510; cursor: pointer; image-rendering: pixelated; }
+        canvas { border: 2px solid #3a1a5e; background: #020510; cursor: pointer; image-rendering: pixelated; box-shadow: 0 0 20px rgba(100,80,200,0.3); }
     </style>
 </head>
 <body>
-    <h1>MOON RUNNER</h1>
+
+    <h2 style="letter-spacing: 5px; color: #c8b8ff;">MOON</h2>
     <canvas id="gameCanvas" width="900" height="400"></canvas>
     <p>Haz clic o presiona ESPACIO para saltar y empezar</p>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const audio = new Audio('moon-kanye.mp3'); // Asegúrate que este archivo esté en la misma carpeta
+        // Usamos tu archivo exacto
+        const audio = new Audio('moon-audio.mp3'); 
 
         let gameState = { x: 80, y: 300, vy: 0, jumping: false };
 
         function drawMoon() {
+            // Luna realista
             ctx.fillStyle = "#f0f0e8";
-            ctx.beginPath(); ctx.arc(750, 80, 40, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(750, 80, 50, 0, Math.PI * 2); ctx.fill();
+            // Cráter simple
+            ctx.fillStyle = "rgba(180,180,170,0.3)";
+            ctx.beginPath(); ctx.arc(770, 60, 15, 0, Math.PI * 2); ctx.fill();
         }
 
         function update() {
             ctx.clearRect(0, 0, 900, 400);
+            
+            // Fondo estrellado
+            ctx.fillStyle = "white";
+            ctx.fillRect(Math.random()*900, Math.random()*200, 2, 2);
+
             drawMoon();
             
-            // Dibujar Kanye básico (Pixel Art placeholder)
+            // Personaje (Kanye)
             ctx.fillStyle = "#B5794A";
             ctx.fillRect(gameState.x, gameState.y, 40, 60);
+            ctx.fillStyle = "#1a1a1a";
+            ctx.fillRect(gameState.x, gameState.y, 40, 20); // Hoodie
             
             // Gravedad
-            if (gameState.y < 300) { gameState.vy += 0.8; gameState.y += gameState.vy; }
-            else { gameState.y = 300; gameState.vy = 0; gameState.jumping = false; }
+            if (gameState.y < 300) { 
+                gameState.vy += 0.8; 
+                gameState.y += gameState.vy; 
+            } else { 
+                gameState.y = 300; 
+                gameState.vy = 0; 
+                gameState.jumping = false; 
+            }
             
             requestAnimationFrame(update);
         }
 
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && !gameState.jumping) {
-                gameState.vy = -15;
-                gameState.jumping = true;
-                if (audio.paused) audio.play();
-            }
-        });
-
-        canvas.addEventListener('click', () => {
+        function jump() {
             if (!gameState.jumping) {
-                gameState.vy = -15;
+                gameState.vy = -16;
                 gameState.jumping = true;
                 if (audio.paused) audio.play();
             }
-        });
+        }
+
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') jump(); });
+        canvas.addEventListener('click', jump);
 
         update();
     </script>
