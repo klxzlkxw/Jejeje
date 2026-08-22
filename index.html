@@ -2,362 +2,348 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Te quiero gis</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Para Gis</title>
 <style>
-  :root{
-    --bg:#fdf1f4;
-    --paper:#ffffff;
-    --pink:#f2a6b6;
-    --pink-deep:#e2879b;
-    --text:#4a3f42;
-    --text-soft:#8a7a7d;
-    --line:#f1dde2;
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap');
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: linear-gradient(160deg, #1c1a33 0%, #241f3f 30%, #2c2749 55%, #342a4d 80%, #3a2d4f 100%);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    overflow: hidden;
   }
 
-  *{ box-sizing: border-box; }
-
-  html, body{
-    margin:0;
-    padding:0;
-    min-height:100vh;
-  }
-
-  body{
-    font-family:'Quicksand', sans-serif;
-    background: var(--bg);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding: 24px 12px 40px;
-  }
-
-  /* ---------- book wrapper ---------- */
-  .book-wrapper{
-    perspective: 2200px;
-    width: min(90vw, 380px);
-  }
-
-  .book{
+  .scene {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4.2;
-    border-radius: 10px;
-    box-shadow: 0 15px 35px rgba(74,63,66,0.15);
+    height: 100vh;
+    min-height: 620px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
-  .leaf{
-    position:absolute;
-    inset:0;
-    transform-style: preserve-3d;
-    transform-origin: left center;
-    transition: transform 0.9s ease;
-    border-radius: 10px;
+  .star {
+    position: absolute;
+    color: #fff;
+    opacity: 0.6;
+    animation: twinkle 3.6s ease-in-out infinite;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.8); }
+    50% { opacity: 0.65; transform: scale(1.1); }
+  }
+
+  .moon {
+    position: absolute;
+    top: 6%;
+    right: 10%;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #ece3d2;
+    box-shadow: inset 9px -3px 0 0 #d8c9de;
+    opacity: 0.85;
+  }
+
+  .book-shell {
+    position: relative;
+    width: 320px;
+    height: 460px;
+    perspective: 2200px;
+  }
+
+  .spine {
+    position: absolute;
+    left: -8px;
+    top: 6px;
+    bottom: 6px;
+    width: 16px;
+    border-radius: 8px 0 0 8px;
+    background: #6b5b7a;
+    box-shadow: inset -3px 0 6px rgba(0,0,0,0.18);
+  }
+
+  .paper-edge {
+    position: absolute;
+    right: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    background: repeating-linear-gradient(180deg, #e8dcc8 0px, #e8dcc8 2px, #dccbaf 2px, #dccbaf 4px);
+    border-radius: 0 6px 6px 0;
+  }
+
+  .pages {
+    position: absolute;
+    inset: 0;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px 14px 14px 6px;
+    background: #f3e9d7;
+    box-shadow: 2px 4px 12px rgba(20,15,35,0.35);
     backface-visibility: hidden;
-    box-shadow: 1px 2px 8px rgba(74,63,66,0.10);
+    transform-origin: left center;
+    transform: rotateY(0deg);
+    transition: transform 1s cubic-bezier(.65,.05,.36,1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 36px 30px;
+    color: #5c4a48;
   }
 
-  .leaf.flipped{
+  .card.flipped {
     transform: rotateY(-178deg);
   }
 
-  .leaf .face{
-    position:absolute;
-    inset:0;
-    border-radius: 10px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    background: var(--paper);
+  .corner-heart {
+    position: absolute;
+    font-size: 14px;
+    color: #c98fa0;
+    opacity: 0.7;
+  }
+  .corner-heart.tl { top: 14px; left: 16px; }
+  .corner-heart.br { bottom: 14px; right: 18px; }
+
+  .opener {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 28px;
+    text-align: center;
+    color: #7a4f5c;
+    margin: 0 0 20px;
+    line-height: 1.35;
   }
 
-  /* ---------- cover ---------- */
-  .leaf[data-index="0"] .face{
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    padding: 10%;
+  .divider {
+    text-align: center;
+    color: #c98fa0;
+    font-size: 14px;
+    letter-spacing: 10px;
+    margin: 0 0 22px;
   }
 
-  .cover-title{
-    font-family:'Quicksand', sans-serif;
-    font-weight:700;
-    font-size: clamp(1.6rem, 6vw, 2.2rem);
-    color: var(--pink-deep);
-    margin: 0 0 34px;
-  }
-
-  .open-btn{
-    padding: 12px 34px;
-    border: none;
-    border-radius: 30px;
-    background: var(--pink);
-    color: #fff;
-    font-family:'Quicksand', sans-serif;
-    font-weight:600;
-    font-size: 1rem;
-    cursor:pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
-  }
-  .open-btn:hover{ background: var(--pink-deep); transform: translateY(-1px); }
-  .open-btn:active{ transform: translateY(0); }
-
-  /* ---------- content pages ---------- */
-  .leaf .face.page-face{
-    background: var(--paper);
-    border: 1px solid var(--line);
-    padding: 12% 9% 10%;
-    justify-content:flex-start;
-    color: var(--text);
-  }
-
-  .page-text{
-    font-size: clamp(0.85rem, 2.6vw, 0.98rem);
-    line-height: 1.65;
-    color: var(--text);
+  .card p.body-text {
+    font-size: 19px;
+    line-height: 1.7;
+    margin: 0 0 18px;
     text-align: left;
-    flex: 1;
-    overflow:auto;
   }
 
-  .page-num{
-    position:absolute;
-    bottom: 10px;
-    right: 16px;
-    font-size: 0.8rem;
-    color: var(--text-soft);
+  .card p.body-text:last-child { margin-bottom: 0; }
+
+  .closing-page {
+    align-items: center;
+    text-align: center;
   }
 
-  /* ---------- closing page ---------- */
-  .leaf[data-index="10"] .face.page-face{
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-  }
-  .closing-heart{
-    font-size: 1.8rem;
-    color: var(--pink-deep);
-    margin-bottom: 12px;
-  }
-  .closing-sign{
-    font-size: 1.05rem;
-    color: var(--text-soft);
-    margin-top: 14px;
+  .closing {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    text-align: center;
+    color: #7a4f5c;
+    font-size: 22px;
+    margin: 6px 0;
+    line-height: 1.5;
   }
 
-  /* ---------- back cover ---------- */
-  .leaf[data-index="11"] .face{
-    background: var(--pink);
+  .nav {
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
   }
 
-  /* ---------- controls ---------- */
-  .controls{
-    margin-top: 20px;
-    display:flex;
-    align-items:center;
-    gap: 20px;
+  .nav-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid #8a7a97;
+    background: #4a3f5c;
+    color: #e8dcec;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+  }
+  .nav-btn:active { transform: scale(0.9); }
+  .nav-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+    box-shadow: none;
   }
 
-  .nav-btn{
-    background: #ffffff;
-    border: 1px solid var(--line);
-    color: var(--pink-deep);
-    width: 40px;
-    height:40px;
-    border-radius:50%;
-    font-size: 1rem;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition: all 0.2s ease;
-  }
-  .nav-btn:hover:not(:disabled){ background: var(--pink); color:#fff; }
-  .nav-btn:disabled{ opacity:0.3; cursor:default; }
-
-  .page-indicator{
-    font-size: 0.9rem;
-    color: var(--text-soft);
-    min-width: 80px;
-    text-align:center;
+  .dots {
+    display: flex;
+    gap: 9px;
   }
 
-  @media (max-width: 420px){
-    .book-wrapper{ width: 92vw; }
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid #8a7a97;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .dot.active {
+    background: #c98fa0;
+    border-color: #c98fa0;
+    transform: scale(1.25);
   }
 </style>
 </head>
 <body>
 
-<div class="book-wrapper">
-  <div class="book" id="book"></div>
-</div>
+<div class="scene" id="scene">
+  <div class="moon"></div>
 
-<div class="controls">
-  <button class="nav-btn" id="prevBtn" aria-label="Página anterior">❮</button>
-  <span class="page-indicator" id="pageIndicator">cerrado</span>
-  <button class="nav-btn" id="nextBtn" aria-label="Página siguiente">❯</button>
+  <div class="book-shell">
+    <div class="spine"></div>
+    <div class="paper-edge"></div>
+    <div class="pages" id="pages"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" aria-label="Página anterior">&#10094;</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn" aria-label="Página siguiente">&#10095;</button>
+  </div>
 </div>
 
 <script>
-(function(){
-  const bookEl = document.getElementById('book');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const indicator = document.getElementById('pageIndicator');
+const pagesData = [
+  {
+    opener: "Te amo muchísimo, Gis.",
+    paragraphs: [
+      "Como te dije antes, eres MUY importante para mí, siempre vas a ser mi persona favorita y no sabría qué hacer sin ti."
+    ]
+  },
+  {
+    paragraphs: [
+      "Honestamente, desde que hablamos más seguido, me siento mejor, porque me llena de felicidad saber que estás bien, saber de ti, etc.",
+      "Aunque te tire mucho hate, es porque te amo demasiado, te adoro, te admiro, te aprecio, muchas cosas más, porque es mi forma de demostrarte lo importante que eres."
+    ]
+  },
+  {
+    paragraphs: [
+      "Suena extraño que te lo diga, no suelo hacerlo ni nada así, pero para mí eres una hermosa persona e increíble, ¿sabes?, o sea, no tanto como yo, pero de veras que yo digo: “Wow, qué suerte de tener una amiguita tan especial”.",
+      "También me alegra mucho saber que tú eres la única persona que sigue acá, por más errores que cometa."
+    ]
+  },
+  {
+    paragraphs: [
+      "Por eso te siento que hasta esto es poco, con todo lo que realmente pienso de ti; simplemente quiero que tengas en claro que para mí siempre serás una persona muy increíble, por ahí perfecta en eso, pero no más que yo, obviamente."
+    ]
+  },
+  {
+    closing: [
+      "En fin, te amo mil ocho mil;",
+      "también te adoro, Giselle."
+    ]
+  }
+];
 
-  // -------- content: edit these freely --------
-  const pages = [
-    // index 0: cover
-    {
-      type: 'cover',
-      html: `
-        <div class="cover-title">Te quiero gis</div>
-        <button class="open-btn" id="openSeal">Abrir</button>
-      `
-    },
-    {
-      type: 'page',
-      text: `Hola, amiguita, quería decirte que te quiero mucho. Sé que esto es raro viniendo de mí, es muy “CURSI”, como tú dices, pero quería recordarte que eres muy importante para mí. Quiero que, por medio de esta “carta” digital, recuerdes eso, que eres muy especial y siempre vas a ser mi persona favorita.`
-    },
-    {
-      type: 'page',
-      text: `Mi única amistad valiosa, entre más, no solo la amistad; tú eres especial y muy “valiosa” en dicho sentido. Por el hecho de ser una persona superincreíble, te agradezco porque, a pesar de tantas fases mías muy estúpidas e inmaduras, estuviste acá hasta el día de ahora; siempre decidiste quedarte (a lo mejor no) y permanecer en mi vida, algo que aprecio demasiado.`
-    },
-    {
-      type: 'page',
-      text: `Es algo estúpido esto, pero te adoro muchísimo; te diría que te amo, pero eso es raro; aun así, quiero que sepas que es así, demasiado. Dejando eso de lado, sí, eres muy especial y, ya que me dijiste a mi imaginación, quiero recordarte que ya llevas muchos años siendo mi persona favorita; por más que haya más personas llegando, tú sigues destacando de todas formas.`
-    },
-    {
-      type: 'page',
-      text: `Quizá a veces hay más prioridades, pero tú siempre fuiste mi única prioridad importante, porque quizá es raro, pero te pondría a ti antes que a quien se supone que me deba importar más. No por falta de respeto o algo así, sino porque me importas más tú, que me has ayudado a mucho.`
-    },
-    {
-      type: 'page',
-      text: `Has estado en mi vida mucho tiempo, me viste cambiar a mal, a bien; entre más, te quedaste y nunca te quejabas directamente de mis actitudes, quiero decir, a tal punto de intentar obligarme a cambiar sí o sí, para seguir estando en mi vida.`
-    },
-    {
-      type: 'page',
-      text: `Es algo que agradezco demasiado y por eso, te adoro demasiado, y siempre será así. Espero que sea así por muchos años más, porque realmente me importas, chavalín.`
-    },
-    {
-      type: 'page',
-      text: `O sea, sí, digo que es raro; no lo es, la verdad, si se trata de decírtelo, porque viene de mi corazón. Quizá me cuesta decirlo; créeme que siempre suelo decir “yo más” o “yo también”, pero tengo el momento para decirte voluntariamente que sí, te amo, te adoro, te quiero y más, por ser esa persona que siempre estuvo conmigo aun siendo a distancia.`
-    },
-    {
-      type: 'page',
-      text: `Créeme que mi felicidad se basa en ti. No miento cuando te dije que lloraba por ti, o sea, lo hice, por el hecho de que para mí lo eras todo, lo sigues siendo de tal forma, porque siempre estuviste; quizá no te tengo conmigo a diario, pero estás ahí, me haces feliz incluso por medio de un chat.`
-    },
-    {
-      type: 'page',
-      text: `Quizá parezca que a veces soy “feliz” por x persona, pero no como tal, realmente; casi siempre paso estresado o en algo, pero uno de tus mensajes me alegraba el día, porque a pesar de todo, siempre fuiste tú, y serás tú. Sé que me cuesta decírtelo, pero intenté ser mejor por ti; quizá no lo soy aún, no estoy de lo mejor en ese aspecto, pero he hecho demasiado esfuerzo porque sé que vale la pena si es por ti, porque eres una persona muy valiosa en mi vida y me importas demasiado.`
-    },
-    // closing page
-    {
-      type: 'closing',
-      html: `
-        <div class="closing-heart">❤</div>
-        <div class="closing-sign">con cariño, siempre.</div>
-      `
-    },
-    // back cover
-    { type: 'back' }
-  ];
+const pagesEl = document.getElementById('pages');
+const dotsEl = document.getElementById('dots');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const scene = document.getElementById('scene');
 
-  const total = pages.length;
-  let current = 0; // number of leaves already flipped (0 = closed book)
+let current = 0;
+const cards = [];
 
-  // build DOM
-  pages.forEach((p, i) => {
-    const leaf = document.createElement('div');
-    leaf.className = 'leaf';
-    leaf.dataset.index = i;
-    leaf.style.zIndex = total - i;
+pagesData.forEach((data, i) => {
+  const card = document.createElement('div');
+  card.className = 'card' + (data.closing ? ' closing-page' : '');
+  card.style.zIndex = pagesData.length - i;
 
-    const face = document.createElement('div');
-    face.className = 'face' + (p.type === 'page' || p.type === 'closing' ? ' page-face' : '');
-
-    if(p.type === 'cover' || p.type === 'closing'){
-      face.innerHTML = p.html;
-    } else if(p.type === 'page'){
-      face.innerHTML = `
-        <div class="page-text">${p.text}</div>
-        <div class="page-num">${i}</div>
-      `;
-    } else if(p.type === 'back'){
-      face.innerHTML = '';
-    }
-
-    leaf.appendChild(face);
-    bookEl.appendChild(leaf);
-  });
-
-  const leaves = Array.from(bookEl.querySelectorAll('.leaf'));
-
-  function render(){
-    leaves.forEach((leaf, i) => {
-      leaf.classList.toggle('flipped', i < current);
+  let html = '<span class="corner-heart tl">&#10084;</span><span class="corner-heart br">&#10084;</span>';
+  if (data.opener) {
+    html += '<p class="opener">' + data.opener + '</p><p class="divider">&#10084; &#10084; &#10084;</p>';
+  }
+  if (data.paragraphs) {
+    data.paragraphs.forEach(p => {
+      html += '<p class="body-text">' + p + '</p>';
     });
-
-    prevBtn.disabled = current === 0;
-    nextBtn.disabled = current === total - 1;
-
-    if(current === 0){
-      indicator.textContent = 'cerrado';
-    } else if(current === total - 1){
-      indicator.textContent = 'fin ♥';
-    } else {
-      indicator.textContent = `pág. ${current} de ${total - 2}`;
-    }
+  }
+  if (data.closing) {
+    html += '<p class="divider">&#10084; &#10084; &#10084;</p>';
+    data.closing.forEach(line => {
+      html += '<p class="closing">' + line + '</p>';
+    });
   }
 
-  function next(){
-    if(current < total - 1){
-      current++;
-      render();
-    }
-  }
-  function prev(){
-    if(current > 0){
-      current--;
-      render();
-    }
-  }
+  card.innerHTML = html;
+  pagesEl.appendChild(card);
+  cards.push(card);
 
-  nextBtn.addEventListener('click', next);
-  prevBtn.addEventListener('click', prev);
+  const dot = document.createElement('button');
+  dot.className = 'dot';
+  dot.setAttribute('aria-label', 'Ir a la página ' + (i + 1));
+  dot.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(dot);
+});
 
-  bookEl.addEventListener('click', function(e){
-    if(e.target && e.target.id === 'openSeal'){
-      next();
-    }
+function render() {
+  cards.forEach((card, i) => {
+    card.classList.toggle('flipped', i < current);
   });
-
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'ArrowRight') next();
-    if(e.key === 'ArrowLeft') prev();
+  Array.from(dotsEl.children).forEach((dot, i) => {
+    dot.classList.toggle('active', i === current);
   });
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === pagesData.length - 1;
+}
 
-  let touchStartX = null;
-  bookEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive:true});
-  bookEl.addEventListener('touchend', (e) => {
-    if(touchStartX === null) return;
-    const diff = e.changedTouches[0].clientX - touchStartX;
-    if(Math.abs(diff) > 40){
-      if(diff < 0) next(); else prev();
-    }
-    touchStartX = null;
-  }, {passive:true});
-
+function goTo(index) {
+  current = Math.max(0, Math.min(pagesData.length - 1, index));
   render();
-})();
+}
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') goTo(current + 1);
+  if (e.key === 'ArrowLeft') goTo(current - 1);
+});
+
+const starCount = 45;
+for (let i = 0; i < starCount; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = 3 + Math.random() * 6;
+  s.style.width = size + 'px';
+  s.style.height = size + 'px';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.background = '#e9e2f2';
+  s.style.borderRadius = '50%';
+  s.style.animationDelay = (Math.random() * 3) + 's';
+  s.style.animationDuration = (2.4 + Math.random() * 2.4) + 's';
+  scene.insertBefore(s, scene.firstChild);
+}
+
+render();
 </script>
 
 </body>
