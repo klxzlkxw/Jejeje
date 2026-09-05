@@ -2,348 +2,303 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Para Gis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Una pregunta especial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap');
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: linear-gradient(160deg, #1c1a33 0%, #241f3f 30%, #2c2749 55%, #342a4d 80%, #3a2d4f 100%);
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    overflow: hidden;
+  :root{
+    --pink-bg-1:#fff0f5;
+    --pink-bg-2:#ffe1ec;
+    --pink-card:#fff7fa;
+    --pink-accent:#e75480;
+    --pink-accent-soft:#f7b6c9;
+    --lavender:#e3c9f0;
+    --text-dark:#7a3b52;
+    --text-soft:#a8677f;
+    --shadow:rgba(231,84,128,0.18);
   }
 
-  .scene {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    min-height: 620px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:'Quicksand', sans-serif;
+    color:var(--text-dark);
+    overflow:hidden;
   }
 
-  .star {
-    position: absolute;
-    color: #fff;
-    opacity: 0.6;
-    animation: twinkle 3.6s ease-in-out infinite;
-    pointer-events: none;
-    user-select: none;
+  body{
+    position:relative;
+    min-height:100vh;
+    background:linear-gradient(160deg, var(--pink-bg-1), var(--pink-bg-2) 60%, #ffeef5);
   }
 
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.15; transform: scale(0.8); }
-    50% { opacity: 0.65; transform: scale(1.1); }
+  /* --- Fondo con destellos --- */
+  #sparkle-layer{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
   }
 
-  .moon {
-    position: absolute;
-    top: 6%;
-    right: 10%;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: #ece3d2;
-    box-shadow: inset 9px -3px 0 0 #d8c9de;
-    opacity: 0.85;
+  .sparkle{
+    position:absolute;
+    border-radius:50%;
+    background:radial-gradient(circle, #ffffff 0%, var(--pink-accent-soft) 70%, transparent 100%);
+    opacity:0.8;
+    animation:twinkle ease-in-out infinite;
   }
 
-  .book-shell {
-    position: relative;
-    width: 320px;
-    height: 460px;
-    perspective: 2200px;
+  @keyframes twinkle{
+    0%, 100%{ transform:scale(0.6); opacity:0.25; }
+    50%{ transform:scale(1.15); opacity:0.9; }
   }
 
-  .spine {
-    position: absolute;
-    left: -8px;
-    top: 6px;
-    bottom: 6px;
-    width: 16px;
-    border-radius: 8px 0 0 8px;
-    background: #6b5b7a;
-    box-shadow: inset -3px 0 6px rgba(0,0,0,0.18);
+  @keyframes floatUp{
+    0%{ transform:translateY(0); }
+    100%{ transform:translateY(-30px); }
   }
 
-  .paper-edge {
-    position: absolute;
-    right: -3px;
-    top: 8px;
-    bottom: 8px;
-    width: 8px;
-    background: repeating-linear-gradient(180deg, #e8dcc8 0px, #e8dcc8 2px, #dccbaf 2px, #dccbaf 4px);
-    border-radius: 0 6px 6px 0;
+  /* --- Escenario principal --- */
+  #stage{
+    position:relative;
+    z-index:1;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
   }
 
-  .pages {
-    position: absolute;
-    inset: 0;
+  .card{
+    position:relative;
+    max-width:560px;
+    width:100%;
+    background:var(--pink-card);
+    border-radius:28px;
+    padding:44px 36px;
+    text-align:center;
+    box-shadow:0 20px 45px var(--shadow), 0 2px 8px rgba(0,0,0,0.03);
+    border:1px solid rgba(231,84,128,0.12);
+    animation:pop-in 0.5s ease;
   }
 
-  .card {
-    position: absolute;
-    inset: 0;
-    border-radius: 6px 14px 14px 6px;
-    background: #f3e9d7;
-    box-shadow: 2px 4px 12px rgba(20,15,35,0.35);
-    backface-visibility: hidden;
-    transform-origin: left center;
-    transform: rotateY(0deg);
-    transition: transform 1s cubic-bezier(.65,.05,.36,1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 36px 30px;
-    color: #5c4a48;
+  @keyframes pop-in{
+    from{ opacity:0; transform:translateY(18px) scale(0.97); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
   }
 
-  .card.flipped {
-    transform: rotateY(-178deg);
+  .headline{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    color:var(--pink-accent);
+    font-size:1.9rem;
+    line-height:1.35;
+    margin:0 0 12px;
   }
 
-  .corner-heart {
-    position: absolute;
-    font-size: 14px;
-    color: #c98fa0;
-    opacity: 0.7;
-  }
-  .corner-heart.tl { top: 14px; left: 16px; }
-  .corner-heart.br { bottom: 14px; right: 18px; }
-
-  .opener {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-style: italic;
-    font-weight: 600;
-    font-size: 28px;
-    text-align: center;
-    color: #7a4f5c;
-    margin: 0 0 20px;
-    line-height: 1.35;
+  .subtext{
+    font-size:1.05rem;
+    color:var(--text-soft);
+    line-height:1.6;
+    margin:0 0 30px;
   }
 
-  .divider {
-    text-align: center;
-    color: #c98fa0;
-    font-size: 14px;
-    letter-spacing: 10px;
-    margin: 0 0 22px;
+  .long-text{
+    font-size:1.02rem;
+    line-height:1.75;
+    color:var(--text-dark);
+    text-align:left;
+    background:#fff;
+    border-radius:18px;
+    padding:22px 24px;
+    margin-bottom:28px;
+    box-shadow:inset 0 0 0 1px rgba(231,84,128,0.08);
   }
 
-  .card p.body-text {
-    font-size: 19px;
-    line-height: 1.7;
-    margin: 0 0 18px;
-    text-align: left;
+  .btn-row{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+    flex-wrap:wrap;
+    position:relative;
+    min-height:60px;
   }
 
-  .card p.body-text:last-child { margin-bottom: 0; }
-
-  .closing-page {
-    align-items: center;
-    text-align: center;
+  button{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    padding:14px 30px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .closing {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-style: italic;
-    font-weight: 600;
-    text-align: center;
-    color: #7a4f5c;
-    font-size: 22px;
-    margin: 6px 0;
-    line-height: 1.5;
+  .btn-primary{
+    background:linear-gradient(135deg, var(--pink-accent), #d43f68);
+    color:#fff;
+    box-shadow:0 8px 20px var(--shadow);
+  }
+  .btn-primary:hover{ transform:translateY(-2px) scale(1.03); }
+
+  .btn-secondary{
+    background:#fff;
+    color:var(--pink-accent);
+    border:2px solid var(--pink-accent-soft);
+  }
+  .btn-secondary:hover{ transform:translateY(-2px) scale(1.03); }
+
+  .escaping{
+    position:fixed;
+    z-index:50;
+    transition:top 0.28s cubic-bezier(.2,.8,.3,1.3), left 0.28s cubic-bezier(.2,.8,.3,1.3);
   }
 
-  .nav {
-    margin-top: 22px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
+  .step{ display:none; }
+  .step.active{ display:block; }
+
+  .final-message{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--pink-accent);
+    margin-top:22px;
+    animation:pop-in 0.5s ease;
   }
 
-  .nav-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid #8a7a97;
-    background: #4a3f5c;
-    color: #e8dcec;
-    font-size: 17px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.15s ease, opacity 0.2s ease;
-  }
-  .nav-btn:active { transform: scale(0.9); }
-  .nav-btn:disabled {
-    opacity: 0.35;
-    cursor: default;
-    box-shadow: none;
-  }
-
-  .dots {
-    display: flex;
-    gap: 9px;
-  }
-
-  .dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    border: 1.5px solid #8a7a97;
-    background: transparent;
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.25s ease, transform 0.25s ease;
-  }
-  .dot.active {
-    background: #c98fa0;
-    border-color: #c98fa0;
-    transform: scale(1.25);
+  @media (max-width:480px){
+    .headline{ font-size:1.9rem; }
+    .card{ padding:32px 22px; }
   }
 </style>
 </head>
 <body>
 
-<div class="scene" id="scene">
-  <div class="moon"></div>
+<div id="sparkle-layer"></div>
 
-  <div class="book-shell">
-    <div class="spine"></div>
-    <div class="paper-edge"></div>
-    <div class="pages" id="pages"></div>
+<div id="stage">
+
+  <!-- Paso 1: Introducción -->
+  <div class="card step active" id="step1">
+    <p class="headline">Hola, me gustas</p>
+    <p class="subtext">Tengo algo que preguntarte.</p>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="goTo('step2')">Siguiente</button>
+    </div>
   </div>
 
-  <div class="nav">
-    <button class="nav-btn" id="prevBtn" aria-label="Página anterior">&#10094;</button>
-    <div class="dots" id="dots"></div>
-    <button class="nav-btn" id="nextBtn" aria-label="Página siguiente">&#10095;</button>
+  <!-- Paso 2: Pregunta con botón travieso -->
+  <div class="card step" id="step2">
+    <p class="headline">¿Quieres ser mi pastelito de nuez?</p>
+    <p class="subtext">Elige con cuidado.</p>
+    <div class="btn-row" id="row2">
+      <button class="btn-secondary" id="btnNo2" onclick="goTo('step3')">NO</button>
+      <button class="btn-primary" id="btnYes2">SÍ</button>
+    </div>
   </div>
+
+  <!-- Paso 3: Pregunta invertida -->
+  <div class="card step" id="step3">
+    <p class="headline">¿Te gustaría ser mi chava? O ¿no te late el chocolate?</p>
+    <p class="subtext">Ahora las cosas se ponen interesantes.</p>
+    <div class="btn-row" id="row3">
+      <button class="btn-primary" id="btnYes3" onclick="goTo('step4')">SÍ</button>
+      <button class="btn-secondary" id="btnNo3">NO</button>
+    </div>
+  </div>
+
+  <!-- Paso 4: Mensaje final -->
+  <div class="card step" id="step4">
+    <p class="headline">Antes de terminar...</p>
+    <div class="long-text">
+      Ya dejando eso de lado, realmente quería pedirte que fueras mi pareja; no es la mejor forma de pedirlo, es algo vacío, pero es que no sabría cómo hacerlo. Sin embargo, me gustas mucho y lo sabes; realmente quisiera que de verdad tengamos algo “amoroso” o algo de ese tipo, porque yo de verdad te amo mucho, quizá no puedo expresarlo porque nunca lo hice realmente. Aunque para mí, tú sí vales la pena y no sé, es extraño, tantos años de amigos, y ahora te estoy pidiendo esto, pero es solo eso, te amo, me gustas, la gran parte del tiempo me gustaste y simplemente quiero saber si aceptas. ¿Te late el chocolate?
+    </div>
+    <div class="btn-row" id="row4">
+      <button class="btn-primary" onclick="showFinal()">SÍ</button>
+      <button class="btn-secondary" onclick="showFinal(true)">NO</button>
+    </div>
+    <div id="finalMessage"></div>
+  </div>
+
 </div>
 
 <script>
-const pagesData = [
-  {
-    opener: "Te amo muchísimo, Gis.",
-    paragraphs: [
-      "Como te dije antes, eres MUY importante para mí, siempre vas a ser mi persona favorita y no sabría qué hacer sin ti. Porque para mi, eres todo lo bueno de mis dias okei"
-    ]
-  },
-  {
-    paragraphs: [
-      "Honestamente, desde que hablamos más seguido, me siento mejor, porque me llena de felicidad saber que estás bien, saber de ti, etc.",
-      "Aunque te tire mucho hate, es porque te amo demasiado, te adoro, te admiro, te aprecio, muchas cosas más, porque es mi forma de demostrarte lo importante que eres."
-    ]
-  },
-  {
-    paragraphs: [
-      "Suena extraño que te lo diga, no suelo hacerlo ni nada así, pero para mí eres una hermosa persona e increíble, ¿sabes?, o sea, no tanto como yo, pero de veras que yo digo: “Wow, qué suerte de tener una amiguita tan especial”.",
-      "También me alegra mucho saber que tú eres la única persona que sigue acá, por más errores que cometa."
-    ]
-  },
-  {
-    paragraphs: [
-      "Por eso te siento que hasta esto es poco, con todo lo que realmente pienso de ti; simplemente quiero que tengas en claro que para mí siempre serás una persona muy increíble, por ahí perfecta en eso, pero no más que yo, obviamente. De igual forma, si eres una persona hermosa, increible, entre mas cosas."
-    ]
-  },
-  {
-    closing: [
-      "En fin, te amo mil ocho mil;",
-      "también te adoro, y significas TODO para mi, giselle."
-    ]
+  /* ---------- Fondo de destellos ---------- */
+  function buildSparkles(count){
+    const layer = document.getElementById('sparkle-layer');
+    layer.innerHTML = '';
+    for(let i=0;i<count;i++){
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      const size = Math.random()*4 + 2;
+      s.style.width = size+'px';
+      s.style.height = size+'px';
+      s.style.left = Math.random()*100+'vw';
+      s.style.top = Math.random()*100+'vh';
+      s.style.animationDuration = (Math.random()*3+2)+'s';
+      s.style.animationDelay = (Math.random()*3)+'s';
+      layer.appendChild(s);
+    }
   }
-];
+  buildSparkles(70);
+  window.addEventListener('resize', () => buildSparkles(70));
 
-const pagesEl = document.getElementById('pages');
-const dotsEl = document.getElementById('dots');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const scene = document.getElementById('scene');
-
-let current = 0;
-const cards = [];
-
-pagesData.forEach((data, i) => {
-  const card = document.createElement('div');
-  card.className = 'card' + (data.closing ? ' closing-page' : '');
-  card.style.zIndex = pagesData.length - i;
-
-  let html = '<span class="corner-heart tl">&#10084;</span><span class="corner-heart br">&#10084;</span>';
-  if (data.opener) {
-    html += '<p class="opener">' + data.opener + '</p><p class="divider">&#10084; &#10084; &#10084;</p>';
-  }
-  if (data.paragraphs) {
-    data.paragraphs.forEach(p => {
-      html += '<p class="body-text">' + p + '</p>';
-    });
-  }
-  if (data.closing) {
-    html += '<p class="divider">&#10084; &#10084; &#10084;</p>';
-    data.closing.forEach(line => {
-      html += '<p class="closing">' + line + '</p>';
-    });
+  /* ---------- Navegación entre pasos ---------- */
+  function goTo(id){
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
   }
 
-  card.innerHTML = html;
-  pagesEl.appendChild(card);
-  cards.push(card);
+  /* ---------- Mecánica: botón que huye ---------- */
+  function makeElusive(btn){
+    function flee(){
+      // Aseguramos posición fixed para moverlo libremente por la pantalla
+      const rect = btn.getBoundingClientRect();
+      if(!btn.classList.contains('escaping')){
+        btn.style.top = rect.top + 'px';
+        btn.style.left = rect.left + 'px';
+        btn.classList.add('escaping');
+      }
+      const margin = 20;
+      const maxX = window.innerWidth - btn.offsetWidth - margin;
+      const maxY = window.innerHeight - btn.offsetHeight - margin;
+      const newX = Math.max(margin, Math.random() * maxX);
+      const newY = Math.max(margin, Math.random() * maxY);
+      btn.style.left = newX + 'px';
+      btn.style.top = newY + 'px';
+    }
+    btn.addEventListener('mouseenter', flee);
+    btn.addEventListener('touchstart', function(e){ e.preventDefault(); flee(); }, {passive:false});
+    btn.addEventListener('click', function(e){ e.preventDefault(); flee(); });
+  }
 
-  const dot = document.createElement('button');
-  dot.className = 'dot';
-  dot.setAttribute('aria-label', 'Ir a la página ' + (i + 1));
-  dot.addEventListener('click', () => goTo(i));
-  dotsEl.appendChild(dot);
-});
+  makeElusive(document.getElementById('btnYes2')); // SÍ huye en paso 2
+  makeElusive(document.getElementById('btnNo3'));  // NO huye en paso 3
 
-function render() {
-  cards.forEach((card, i) => {
-    card.classList.toggle('flipped', i < current);
-  });
-  Array.from(dotsEl.children).forEach((dot, i) => {
-    dot.classList.toggle('active', i === current);
-  });
-  prevBtn.disabled = current === 0;
-  nextBtn.disabled = current === pagesData.length - 1;
-}
+  /* ---------- Mensaje final ---------- */
+  function showFinal(isNo){
+    const box = document.getElementById('finalMessage');
+    document.getElementById('row4').style.display = 'none';
+    document.querySelector('#step4 .long-text').style.display = 'none';
+    if(isNo){
+      box.innerHTML = '<p class="final-message">¿Segura/o? Mi corazón sigue esperando.</p>' +
+        '<div class="btn-row"><button class="btn-primary" onclick="resetFinal()">Lo pensé mejor, SÍ</button></div>';
+    } else {
+      box.innerHTML = '<p class="final-message">Ahora eres mi lobita verdad, entonces ya nos podemos casar jeje</p>';
+    }
+  }
 
-function goTo(index) {
-  current = Math.max(0, Math.min(pagesData.length - 1, index));
-  render();
-}
-
-prevBtn.addEventListener('click', () => goTo(current - 1));
-nextBtn.addEventListener('click', () => goTo(current + 1));
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight') goTo(current + 1);
-  if (e.key === 'ArrowLeft') goTo(current - 1);
-});
-
-const starCount = 45;
-for (let i = 0; i < starCount; i++) {
-  const s = document.createElement('div');
-  s.className = 'star';
-  const size = 3 + Math.random() * 6;
-  s.style.width = size + 'px';
-  s.style.height = size + 'px';
-  s.style.left = Math.random() * 100 + '%';
-  s.style.top = Math.random() * 100 + '%';
-  s.style.background = '#e9e2f2';
-  s.style.borderRadius = '50%';
-  s.style.animationDelay = (Math.random() * 3) + 's';
-  s.style.animationDuration = (2.4 + Math.random() * 2.4) + 's';
-  scene.insertBefore(s, scene.firstChild);
-}
-
-render();
+  function resetFinal(){
+    document.querySelector('#step4 .long-text').style.display = 'block';
+    document.getElementById('row4').style.display = 'flex';
+    document.getElementById('finalMessage').innerHTML = '';
+  }
 </script>
 
 </body>
